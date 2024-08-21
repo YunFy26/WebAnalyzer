@@ -11,6 +11,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Router analysis to extract urls from controller classes
+ */
 public class RouterAnalysis extends ProgramAnalysis {
 
     public static final String ID = "routerAnalysis";
