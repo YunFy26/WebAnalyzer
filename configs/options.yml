@@ -1,0 +1,27 @@
+optionsFile: null
+printHelp: false
+# WebGoat libs
+classPath :
+  - WebGoat/BOOT-INF/lib
+# appClass
+appClassPath: [WebGoat/BOOT-INF/classes]
+mainClass:
+inputClasses: []
+javaVersion: 17
+prependJVM: true
+allowPhantom: true
+worldBuilderClass: pascal.taie.frontend.soot.SootWorldBuilder
+outputDir: output
+preBuildIR: false
+worldCacheMode: false
+scope: REACHABLE
+nativeModel: true
+planFile: null
+analyses:
+#  ir-dumper: ;
+  routerAnalysis: ""
+  pta: "plugins:[org.example.spring.AddRouterEntryPlugin]"
+#  cg: ""
+onlyGenPlan: false
+keepResult:
+  - $KEEP-ALL
