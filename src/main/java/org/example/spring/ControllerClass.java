@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Entity class including the JClass, routerMethods and baseUrls
+ */
 public class ControllerClass {
 
     private final String urlFilePath = "output/urls.txt";
