@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Entity class including the JMethod and urls
+ */
 public class RouterMethod {
 
     private JMethod jMethod;
