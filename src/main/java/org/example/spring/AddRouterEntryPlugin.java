@@ -10,6 +10,9 @@ import pascal.taie.language.type.TypeSystem;
 
 import java.util.List;
 
+/**
+ * Add routerMethods in ControllerClass as new entry points
+ */
 public class AddRouterEntryPlugin implements Plugin {
 
     private Solver solver;
