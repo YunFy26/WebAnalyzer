@@ -1,6 +1,5 @@
 package org.example;
 
-import java.lang.reflect.InvocationTargetException;
 
 public class MyMain {
 
@@ -9,6 +8,10 @@ public class MyMain {
                 "--options-file",
                 "configs/options.yml"
         );
+
+
+
     }
+
 
 }
