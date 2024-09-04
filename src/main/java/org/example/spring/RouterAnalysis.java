@@ -5,6 +5,7 @@ import pascal.taie.analysis.ProgramAnalysis;
 import pascal.taie.config.AnalysisConfig;
 import pascal.taie.language.classes.JClass;
 import pascal.taie.language.classes.JMethod;
+import pascal.taie.language.type.Type;
 
 import java.util.ArrayList;
 import java.util.Collection;
