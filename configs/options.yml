@@ -16,16 +16,17 @@ worldBuilderClass: pascal.taie.frontend.soot.SootWorldBuilder
 outputDir: output
 preBuildIR: false
 worldCacheMode: false
-scope: APP
+scope: REACHABLE
 nativeModel: true
 planFile: null
 analyses:
   ir-dumper: ;
   routerAnalysis: ""
-  pta: "plugins:[org.example.spring.AddRouterEntryPlugin]"
-#  cfg: ;
-#  entryPointCFG: ""
-  cg: ""
+  beanAnalysis: ""
+#  cg: ""
+#  cfg: ""
+#  icfg: ""
+  pta: "plugins:[org.example.spring.DICGConstructorPlugin]"
 onlyGenPlan: false
 keepResult:
   - $KEEP-ALL
