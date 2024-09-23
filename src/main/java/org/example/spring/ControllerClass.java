@@ -66,50 +66,50 @@ public class ControllerClass {
 
     public void printUrls() {
         // 写入文件
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter(urlFilePath, true))) {
-//            if (!baseUrls.isEmpty()) {
-//                for (String baseUrl : baseUrls) {
-//                    baseUrl = baseUrl.substring(2, baseUrl.length() - 2);
-//
-//                    for (RouterMethod routerMethod : routerMethods) {
-//                        for (String url : routerMethod.getUrls()) {
-//                            url = url.substring(2, url.length() - 2);
-//                            writer.write(baseUrl + url);
-//                            writer.newLine();
-//                        }
-//                    }
-//                }
-//            } else {
-//                for (RouterMethod routerMethod : routerMethods) {
-//                    for (String url : routerMethod.getUrls()) {
-//                        url = url.substring(2, url.length() - 2);
-//                        writer.write(url);
-//                        writer.newLine();
-//                    }
-//                }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(urlFilePath, true))) {
+            if (!baseUrls.isEmpty()) {
+                for (String baseUrl : baseUrls) {
+                    baseUrl = baseUrl.substring(2, baseUrl.length() - 2);
 
-        if (!baseUrls.isEmpty()){
-            for (String baseUrl : baseUrls) {
-                baseUrl = baseUrl.substring(2, baseUrl.length() - 2);
+                    for (RouterMethod routerMethod : routerMethods) {
+                        for (String url : routerMethod.getUrls()) {
+                            url = url.substring(2, url.length() - 2);
+                            writer.write(baseUrl + url + "  <--->  " + routerMethod.getJMethod().getDeclaringClass().getName() + "." + routerMethod.getJMethod().getName() + "()");
+                            writer.newLine();
+                        }
+                    }
+                }
+            } else {
                 for (RouterMethod routerMethod : routerMethods) {
                     for (String url : routerMethod.getUrls()) {
                         url = url.substring(2, url.length() - 2);
-                        System.out.println(baseUrl+ url);
+                        writer.write(url + "  <--->  " + routerMethod.getJMethod().getDeclaringClass().getName() + "." + routerMethod.getJMethod().getName() + "()");
+                        writer.newLine();
                     }
                 }
             }
-        }else {
-            for (RouterMethod routerMethod : routerMethods) {
-                for (String url : routerMethod.getUrls()) {
-                    url = url.substring(2, url.length() - 2);
-                    System.out.println(url);
-                }
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+//        if (!baseUrls.isEmpty()){
+//            for (String baseUrl : baseUrls) {
+//                baseUrl = baseUrl.substring(2, baseUrl.length() - 2);
+//                for (RouterMethod routerMethod : routerMethods) {
+//                    for (String url : routerMethod.getUrls()) {
+//                        url = url.substring(2, url.length() - 2);
+//                        System.out.println(baseUrl+ url);
+//                    }
+//                }
+//            }
+//        }else {
+//            for (RouterMethod routerMethod : routerMethods) {
+//                for (String url : routerMethod.getUrls()) {
+//                    url = url.substring(2, url.length() - 2);
+//                    System.out.println(url);
+//                }
+//            }
+//        }
     }
 
 }
