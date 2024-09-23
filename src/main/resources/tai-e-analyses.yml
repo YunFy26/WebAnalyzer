@@ -26,7 +26,8 @@
     expected-file: null # path of expected file for comparing results
     reflection-inference: string-constant # | solar | null
     reflection-log: null # path to reflection log, required when reflection option is log
-    taint-config: null # path to config file of taint analysis,
+    taint-config: null # path (of dir/file) to config file of taint analysis,
+    taint-config-providers: [ ] # class names of taint config provider classes
     # when this file is given, taint analysis will be enabled
     taint-interactive-mode: false # whether enable interactive mode for taint analysis
     plugins: [ ] # | [ pluginClass, ... ]
@@ -36,12 +37,12 @@
 - description: call graph construction
   analysisClass: pascal.taie.analysis.graph.callgraph.CallGraphBuilder
   id: cg
-  requires: [ pta(algorithm=pta) ]
+  requires: [ routerAnalysis, beanAnalysis, pta(algorithm=pta) ]
   options:
     algorithm: pta # | cha | cha=LIMIT | cha-full
-    dump: true # whether dump call graph in dot file
-    dump-methods: true # whether dump reachable methods
-    dump-call-edges: true # whether dump call edges
+    dump: false # whether dump call graph in dot file
+    dump-methods: false # whether dump reachable methods
+    dump-call-edges: false # whether dump call edges
 
 - description: identify casts that may fail
   analysisClass: pascal.taie.analysis.pta.client.MayFailCast
@@ -75,7 +76,7 @@
   requires: [ throw(exception=explicit|all) ]
   options:
     exception: explicit # | null | all (includes implicit and explicit exceptions)
-    dump: true # dump control-flow graph
+    dump: false # dump control-flow graph
 
 - description: interprocedural control-flow graph
   analysisClass: pascal.taie.analysis.graph.icfg.ICFGBuilder
@@ -167,6 +168,11 @@
 - description: router analysis
   analysisClass: org.example.spring.RouterAnalysis
   id: routerAnalysis
+  requires: []
+
+- description: bean analysis
+  analysisClass: org.example.spring.BeanAnalysis
+  id: beanAnalysis
   requires: []
 
 #- description: entryPointCfg analysis
