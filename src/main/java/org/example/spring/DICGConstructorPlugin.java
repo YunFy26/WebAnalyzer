@@ -2,9 +2,6 @@ package org.example.spring;
 
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
-import pascal.taie.analysis.graph.callgraph.CallGraphs;
-import pascal.taie.analysis.graph.callgraph.Edge;
-import pascal.taie.analysis.graph.icfg.ICFG;
 import pascal.taie.analysis.pta.PointerAnalysisResult;
 import pascal.taie.analysis.pta.core.cs.context.Context;
 import pascal.taie.analysis.pta.core.cs.element.*;
@@ -15,7 +12,6 @@ import pascal.taie.analysis.pta.core.solver.EntryPoint;
 import pascal.taie.analysis.pta.core.solver.Solver;
 import pascal.taie.analysis.pta.core.heap.HeapModel;
 import pascal.taie.analysis.pta.plugin.Plugin;
-import pascal.taie.analysis.pta.pts.PointsToSet;
 import pascal.taie.ir.exp.*;
 import pascal.taie.ir.stmt.*;
 import pascal.taie.language.annotation.Annotation;
@@ -33,7 +29,7 @@ import java.util.stream.Stream;
 /**
  * Add routerMethods in ControllerClass as new entry points
  */
-public class AddRouterEntryPlugin implements Plugin {
+public class DICGConstructorPlugin implements Plugin {
 
     private Solver solver;
 
@@ -123,6 +119,7 @@ public class AddRouterEntryPlugin implements Plugin {
                     InvokeExp invokeExp = invoke.getRValue();
                     if (invokeExp instanceof InvokeInstanceExp invokeInstanceExp){
                         Var base = invokeInstanceExp.getBase();
+                        base.getName();
                         if (solver.getCSManager().getCSVar(context, base).getPointsToSet() == null || Objects.requireNonNull(solver.getCSManager().getCSVar(context, base).getPointsToSet()).isEmpty()){
                             if(!base.getName().equals("%this")){
                                 // 变量对应的field
@@ -162,6 +159,14 @@ public class AddRouterEntryPlugin implements Plugin {
 
     @Override
     public void onFinish() {
+        // 输出url路径及对应的入口方法
+        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
+        for (ControllerClass controllerClass: routerAnalysis){
+            controllerClass.printUrls();
+        }
+        // 输出Beans
+
+        // 输出调用流
         CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
         Stream<CSMethod> csMethodStream = callGraph.entryMethods();
         CallGraphExplorer callGraphExplorer = new CallGraphExplorer(callGraph);
@@ -172,10 +177,6 @@ public class AddRouterEntryPlugin implements Plugin {
                 e.printStackTrace();
             }
         });
-        PointerAnalysisResult result = solver.getResult();
-        System.out.println(result);
-
-
     }
 
 
@@ -192,3 +193,5 @@ public class AddRouterEntryPlugin implements Plugin {
     }
 
 }
+
+
