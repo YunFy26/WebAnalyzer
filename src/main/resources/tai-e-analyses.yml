@@ -40,9 +40,9 @@
   requires: [ routerAnalysis, beanAnalysis, pta(algorithm=pta) ]
   options:
     algorithm: pta # | cha | cha=LIMIT | cha-full
-    dump: false # whether dump call graph in dot file
-    dump-methods: false # whether dump reachable methods
-    dump-call-edges: false # whether dump call edges
+    dump: true # whether dump call graph in dot file
+    dump-methods: true # whether dump reachable methods
+    dump-call-edges: true # whether dump call edges
 
 - description: identify casts that may fail
   analysisClass: pascal.taie.analysis.pta.client.MayFailCast

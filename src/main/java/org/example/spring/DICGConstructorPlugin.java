@@ -101,16 +101,45 @@ public class DICGConstructorPlugin implements Plugin {
                 if (springUtils.isDependencyInjectionField(field)){
 //                    System.out.println(field.getName());
                     String specifyName = springUtils.processFieldInjection(field);
-//                    boolean processed = false;
+                    boolean processed = false;
                     for (BeanInfo beanInfo: beanInfoSet){
                         if (specifyName.equals(beanInfo.getFromAnnotationName()) || specifyName.equals(beanInfo.getDefaultName())){
-                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), beanInfo.getBeanClass().getType());
+                            // 对象分配点以field.getRef()不合理，采用jMethod.getRef()，表示这个对象是在方法jMethod中分配的
+//                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), beanInfo.getBeanClass().getType());
+                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", jMethod.getRef(), beanInfo.getBeanClass().getType());
                             Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
                             solver.addVarPointsTo(context, lValue, heapContext, obj);
-//                            processed = true;
+                            processed = true;
                         }
                     }
-//                    // TODO
+                    // TODO
+                    if (!processed){
+                        String name = field.getType().getName();
+                        JClass aClass = hierarchy.getClass(name);
+                        Collection<JClass> implementors = new HashSet<>();
+                        if (aClass != null) {
+                            if (aClass.isInterface()){
+                                implementors.addAll(hierarchy.getDirectImplementorsOf(aClass));
+                            }else  {
+                                implementors.addAll(hierarchy.getAllSubclassesOf(aClass));
+                            }
+                        }
+                        Set<JClass> intersection = new HashSet<>();
+                        for (BeanInfo beanInfo : beanInfoSet) {
+                            for (JClass jClass : implementors) {
+                                if (beanInfo.getBeanClass().getName().equals(jClass.getName())) {
+                                    intersection.add(jClass);
+                                    break;
+                                }
+                            }
+                        }
+                        for (JClass jClass : intersection){
+//                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), jClass.getType());
+                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", jMethod.getRef(), jClass.getType());
+                            Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
+                            solver.addVarPointsTo(context, lValue, heapContext, obj);
+                        }
+                    }
                 }
             }
             // 处理setter Injection 和 constructor Injection
@@ -130,21 +159,47 @@ public class DICGConstructorPlugin implements Plugin {
                                     // 按照fieldName名称匹配注入的bean
                                     for (BeanInfo beanInfo : beanInfoSet){
                                         if (beanInfo.getDefaultName().equals(fieldName)){
-                                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), beanInfo.getBeanClass().getType());
+//                                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), beanInfo.getBeanClass().getType());
+                                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", jMethod.getRef(), beanInfo.getBeanClass().getType());
                                             Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
                                             solver.addVarPointsTo(context, base, heapContext, obj);
                                             processed = true;
                                         }
                                     }
-                                }
-                                if (!processed){
-
+                                    if (!processed){
+                                        String name = field.getType().getName();
+                                        JClass aClass = hierarchy.getClass(name);
+                                        Collection<JClass> implementors = new HashSet<>();
+                                        if (aClass != null) {
+                                            if (aClass.isInterface()){
+                                                implementors.addAll(hierarchy.getDirectImplementorsOf(aClass));
+                                            }else  {
+                                                implementors.addAll(hierarchy.getAllSubclassesOf(aClass));
+                                            }
+                                        }
+                                        Set<JClass> intersection = new HashSet<>();
+                                        for (BeanInfo beanInfo : beanInfoSet) {
+                                            for (JClass jClass : implementors) {
+                                                if (beanInfo.getBeanClass().getName().equals(jClass.getName())) {
+                                                    intersection.add(jClass);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        for (JClass jClass : intersection){
+//                                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), jClass.getType());
+                                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", jMethod.getRef(), jClass.getType());
+                                            Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
+                                            solver.addVarPointsTo(context, base, heapContext, obj);
+                                        }
+                                    }
                                 }
                             }else {
                                 Type type = base.getType();
                                 JClass aClass = hierarchy.getClass(type.getName());
                                 if (aClass != null){
-                                    Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", base.getName(), aClass.getType());
+//                                    Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", base.getName(), aClass.getType());
+                                    Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", jMethod.getRef(), aClass.getType());
                                     Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
                                     solver.addVarPointsTo(context, base, heapContext, obj);
                                 }
@@ -159,6 +214,9 @@ public class DICGConstructorPlugin implements Plugin {
 
     @Override
     public void onFinish() {
+        PointerAnalysisResult result = solver.getResult();
+        JClass aClass = hierarchy.getClass("org.example.springtest.CommandExecClass");
+
         // 输出url路径及对应的入口方法
         List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
         for (ControllerClass controllerClass: routerAnalysis){
