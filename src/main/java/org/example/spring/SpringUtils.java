@@ -240,8 +240,8 @@ public class SpringUtils {
     }
 
     public String processFieldInjection(JField field){
-        FieldOfFieldInjection fieldOfFieldInjection = new FieldOfFieldInjection(field);
-        return fieldOfFieldInjection.getSpecifyName();
+        InjectionPoint injectionPoint = new InjectionPoint(field);
+        return injectionPoint.getSpecifyName();
     }
 
 

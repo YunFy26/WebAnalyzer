@@ -9,13 +9,13 @@ import java.util.Objects;
  * 对于FieldInjection这种注入方式（即直接在field上面写依赖注入相关的注解）实例化一个FieldOfFieldInjection类
  * 用于提供相关操作接口
  */
-public class FieldOfFieldInjection {
+public class InjectionPoint {
 
     private final JField field;
 
     private final String defaultName;
 
-    public FieldOfFieldInjection(JField field) {
+    public InjectionPoint(JField field) {
         this.field = field;
         this.defaultName = field.getName();
     }
