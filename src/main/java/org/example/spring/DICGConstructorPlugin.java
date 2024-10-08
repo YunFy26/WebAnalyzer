@@ -2,6 +2,7 @@ package org.example.spring;
 
 import org.example.utils.CallGraphPrinter;
 import org.example.utils.SpringUtils;
+import org.example.utils.UrlPrinter;
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
 import pascal.taie.analysis.pta.PointerAnalysisResult;
@@ -144,12 +145,11 @@ public class DICGConstructorPlugin implements Plugin {
         //
         JClass aClass = hierarchy.getClass("org.springframework.util.MultiValueMap");
 
-        // 输出url路径及对应的入口方法
-//        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
-//        for (ControllerClass controllerClass: routerAnalysis){
-//            controllerClass.printUrls();
-//        }
-
+        // output urls
+        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
+        UrlPrinter urlPrinter = new UrlPrinter(routerAnalysis);
+        urlPrinter.printUrls();
+        // output cg
         CallGraphPrinter callGraphPrinter = new CallGraphPrinter(solver.getCallGraph());
         CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
         callGraph.entryMethods().forEach(csMethod -> {
