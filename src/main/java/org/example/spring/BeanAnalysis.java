@@ -1,5 +1,6 @@
 package org.example.spring;
 
+import org.example.utils.SpringUtils;
 import pascal.taie.World;
 import pascal.taie.analysis.ProgramAnalysis;
 import pascal.taie.config.AnalysisConfig;
