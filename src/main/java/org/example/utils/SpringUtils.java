@@ -1,5 +1,9 @@
-package org.example.spring;
+package org.example.utils;
 
+import org.example.spring.BeanInfo;
+import org.example.spring.ComponentType;
+import org.example.spring.DependencyInjectionType;
+import org.example.spring.InjectionPoint;
 import pascal.taie.ir.stmt.LoadField;
 import pascal.taie.language.annotation.Annotation;
 import pascal.taie.language.classes.ClassHierarchy;
