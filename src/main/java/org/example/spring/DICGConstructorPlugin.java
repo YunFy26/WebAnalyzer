@@ -1,5 +1,7 @@
 package org.example.spring;
 
+import org.example.utils.CallGraphPrinter;
+import org.example.utils.SpringUtils;
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
 import pascal.taie.analysis.pta.PointerAnalysisResult;
@@ -22,8 +24,8 @@ import pascal.taie.language.classes.JMethod;
 import pascal.taie.language.type.TypeSystem;
 
 import java.io.IOException;
+import java.lang.invoke.CallSite;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Add routerMethods in ControllerClass as new entry points
@@ -69,14 +71,10 @@ public class DICGConstructorPlugin implements Plugin {
         for (ControllerClass controllerClass: routerAnalysis){
             List<RouterMethod> routerMethods = controllerClass.getRouterMethods();
             for (RouterMethod routerMethod: routerMethods) {
+                // TODO: Mock parameter
                 solver.addEntryPoint(new EntryPoint(routerMethod.getJMethod(), EmptyParamProvider.get()));
             }
         }
-
-//        for (BeanInfo beanInfo: beanInfoSet) {
-//            System.out.println(beanInfo.toString());
-//        }
-
     }
 
 
@@ -85,7 +83,7 @@ public class DICGConstructorPlugin implements Plugin {
         JMethod jMethod = csMethod.getMethod();
         Context context = csMethod.getContext();
         if (isJdkCalls(jMethod)) {
-            return;
+            solver.addIgnoredMethod(csMethod.getMethod());
         }
         List<Stmt> stmts = jMethod.getIR().getStmts();
         HashMap<Var, JField> varField = new HashMap<>();
@@ -101,7 +99,7 @@ public class DICGConstructorPlugin implements Plugin {
             if (stmt instanceof Invoke invoke){
                 if (invoke.isInterface() || invoke.isVirtual()){
                     InvokeExp invokeExp = invoke.getRValue();
-                    if (invokeExp instanceof InvokeInstanceExp invokeInstanceExp){
+                    if (invokeExp instanceof InvokeInstanceExp){
                         invokeInstanceExps.add(invoke);
                     }
                 }
@@ -115,7 +113,7 @@ public class DICGConstructorPlugin implements Plugin {
             if (pointsToSet == null || pointsToSet.isEmpty()){
                 if (!"%this".equals(base.getName())){
                     JField field = varField.get(base);
-                    boolean processed = false;
+                    boolean processed;
                     if(field != null){
                         // process Field Injection
                         if (springUtils.isDependencyInjectionField(field)){
@@ -147,22 +145,20 @@ public class DICGConstructorPlugin implements Plugin {
         JClass aClass = hierarchy.getClass("org.springframework.util.MultiValueMap");
 
         // 输出url路径及对应的入口方法
-        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
-        for (ControllerClass controllerClass: routerAnalysis){
-            controllerClass.printUrls();
-        }
-        // 输出Beans
+//        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
+//        for (ControllerClass controllerClass: routerAnalysis){
+//            controllerClass.printUrls();
+//        }
 
-        // 输出调用流
+        CallGraphPrinter callGraphPrinter = new CallGraphPrinter(solver.getCallGraph());
         CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
-        Stream<CSMethod> csMethodStream = callGraph.entryMethods();
-        CallGraphExplorer callGraphExplorer = new CallGraphExplorer(callGraph);
-        csMethodStream.forEach(csMethod -> {
+        callGraph.entryMethods().forEach(csMethod -> {
             try {
-                callGraphExplorer.generateDotFile(csMethod);
+                callGraphPrinter.generateDotFile(csMethod);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
+
         });
     }
 
@@ -262,7 +258,7 @@ public class DICGConstructorPlugin implements Plugin {
         }
 
         for (JClass jClazz : intersection){
-            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, jClass.getType());
+            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, jClazz.getType());
             Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
             solver.addVarPointsTo(context, var, heapContext, obj);
         }
