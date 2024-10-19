@@ -44,23 +44,24 @@ public class BeanAnalysis extends ProgramAnalysis {
             }
 
             // 查找带有 @Configuration 注解的类并处理 @Bean 方法
-            if (jClass.hasAnnotation(ComponentType.Configuration.getType())) {
+            if (jClass.hasAnnotation(BeanAnnotationRules.Configuration.getType())) {
                 Collection<JMethod> methods = jClass.getDeclaredMethods();
                 for (JMethod method : methods) {
-                    if (method.hasAnnotation(ComponentType.Bean.getType())) {
-                        Annotation annotation = method.getAnnotation(ComponentType.Bean.getType());
+                    if (method.hasAnnotation(BeanAnnotationRules.Bean.getType())) {
+                        Annotation annotation = method.getAnnotation(BeanAnnotationRules.Bean.getType());
                         if (annotation != null) {
                             String fromAnnotationName = null;
                             if (annotation.hasElement("value")) {
                                 fromAnnotationName = Objects.requireNonNull(annotation.getElement("value")).toString();
                             }
                             JClass beanClass = world.getClassHierarchy().getClass(method.getReturnType().getName());
+//                            System.out.println(beanClass);
                             if (beanClass != null) {
                                 if (beanClass.isInterface()) {
                                     Collection<JClass> directImplementorsOf = world.getClassHierarchy().getDirectImplementorsOf(beanClass);
                                     for (JClass implementor : directImplementorsOf) {
-                                        if (!implementor.isInterface() && !implementor.isAbstract()) {
-                                            BeanInfo beanInfo = new BeanInfo(beanClass, fromAnnotationName);
+                                        if (!implementor.isAbstract()) {
+                                            BeanInfo beanInfo = new BeanInfo(implementor, fromAnnotationName);
                                             beanInfoSet.add(beanInfo);
                                         }
                                     }
@@ -73,8 +74,8 @@ public class BeanAnalysis extends ProgramAnalysis {
                                         }
                                     }
                                 }
-                                BeanInfo beanInfo = new BeanInfo(beanClass, fromAnnotationName);
-                                beanInfoSet.add(beanInfo);
+//                                BeanInfo beanInfo = new BeanInfo(beanClass, fromAnnotationName);
+//                                beanInfoSet.add(beanInfo);
                             }
                         }
                     }
@@ -87,10 +88,10 @@ public class BeanAnalysis extends ProgramAnalysis {
      * 获取类注解上指定的名称，如果没有指定名称，则返回 null
      */
     private String getBeanNameFromAnnotations(JClass jClass) {
-        Annotation componentAnnotation = jClass.getAnnotation(ComponentType.Component.getType());
-        Annotation serviceAnnotation = jClass.getAnnotation(ComponentType.Service.getType());
-        Annotation controllerAnnotation = jClass.getAnnotation(ComponentType.Controller.getType());
-        Annotation repositoryAnnotation = jClass.getAnnotation(ComponentType.Repository.getType());
+        Annotation componentAnnotation = jClass.getAnnotation(BeanAnnotationRules.Component.getType());
+        Annotation serviceAnnotation = jClass.getAnnotation(BeanAnnotationRules.Service.getType());
+        Annotation controllerAnnotation = jClass.getAnnotation(BeanAnnotationRules.Controller.getType());
+        Annotation repositoryAnnotation = jClass.getAnnotation(BeanAnnotationRules.Repository.getType());
 
         // 检查所有相关注解的 "value" 元素
         if (componentAnnotation != null && componentAnnotation.hasElement("value")) {
