@@ -1,8 +1,8 @@
 package org.example.utils;
 
+import org.example.spring.BeanAnnotationRules;
 import org.example.spring.BeanInfo;
-import org.example.spring.ComponentType;
-import org.example.spring.DependencyInjectionType;
+import org.example.spring.InjectionAnnotationRules;
 import org.example.spring.InjectionPoint;
 import pascal.taie.ir.stmt.LoadField;
 import pascal.taie.language.annotation.Annotation;
@@ -75,9 +75,9 @@ public class SpringUtils {
     private boolean hasDIAnnotation(Collection<Annotation> annotations) {
         for (Annotation annotation : annotations) {
             String annotationType = annotation.getType();
-            if (annotationType.equals(DependencyInjectionType.Autowired.getType()) ||
-                    annotationType.equals(DependencyInjectionType.Inject.getType()) ||
-                    annotationType.equals(DependencyInjectionType.Resource.getType())) {
+            if (annotationType.equals(InjectionAnnotationRules.Autowired.getType()) ||
+                    annotationType.equals(InjectionAnnotationRules.Inject.getType()) ||
+                    annotationType.equals(InjectionAnnotationRules.Resource.getType())) {
                 return true;
             }
         }
@@ -113,14 +113,14 @@ public class SpringUtils {
     public JClass getImplClass(JClass fieldClass, JField field) {
         // 先查找所有标记了 @Configuration 的类
         Collection<JClass> configClasses = hierarchy.applicationClasses().filter(jClass ->
-                jClass.hasAnnotation(ComponentType.Configuration.getType())
+                jClass.hasAnnotation(BeanAnnotationRules.Configuration.getType())
         ).toList();
 
         // 在这些类中查找带有@Bean的方法
         for (JClass configClass : configClasses) {
             Collection<JMethod> methods = configClass.getDeclaredMethods();
             for (JMethod method : methods) {
-                if (method.hasAnnotation(ComponentType.Bean.getType())) {
+                if (method.hasAnnotation(BeanAnnotationRules.Bean.getType())) {
                     // 如果 @Bean 方法的返回类型匹配注入字段的类型，返回该类型
                     if (method.getReturnType().equals(fieldClass.getType())) {
                         return hierarchy.getClass(method.getReturnType().getName());
@@ -130,13 +130,13 @@ public class SpringUtils {
         }
 
         // 处理 @Qualifier 注解
-        if (field.hasAnnotation(DependencyInjectionType.Qualifier.getType())) {
-            String qualifierValue = Objects.requireNonNull(Objects.requireNonNull(field.getAnnotation(DependencyInjectionType.Qualifier.getType()))
+        if (field.hasAnnotation(InjectionAnnotationRules.Qualifier.getType())) {
+            String qualifierValue = Objects.requireNonNull(Objects.requireNonNull(field.getAnnotation(InjectionAnnotationRules.Qualifier.getType()))
                     .getElement("value")).toString();
             Collection<JClass> subClasses = hierarchy.getAllSubclassesOf(fieldClass);
             for (JClass subClass : subClasses) {
-                if (subClass.hasAnnotation(DependencyInjectionType.Qualifier.getType())) {
-                    String subClassQualifierValue = Objects.requireNonNull(Objects.requireNonNull(subClass.getAnnotation(DependencyInjectionType.Qualifier.getType()))
+                if (subClass.hasAnnotation(InjectionAnnotationRules.Qualifier.getType())) {
+                    String subClassQualifierValue = Objects.requireNonNull(Objects.requireNonNull(subClass.getAnnotation(InjectionAnnotationRules.Qualifier.getType()))
                             .getElement("value")).toString();
                     if (qualifierValue.equals(subClassQualifierValue)) {
                         return subClass;
@@ -156,8 +156,8 @@ public class SpringUtils {
         }
 
         // 处理 @Resource 注解，优先通过名称匹配
-        if (field.hasAnnotation(DependencyInjectionType.Resource.getType())) {
-            String fieldName = Objects.requireNonNull(Objects.requireNonNull(field.getAnnotation(DependencyInjectionType.Resource.getType()))
+        if (field.hasAnnotation(InjectionAnnotationRules.Resource.getType())) {
+            String fieldName = Objects.requireNonNull(Objects.requireNonNull(field.getAnnotation(InjectionAnnotationRules.Resource.getType()))
                     .getElement("name")).toString();
             for (JClass concreteClass : concreteClasses) {
                 String componentName = getComponentName(concreteClass);
@@ -183,22 +183,22 @@ public class SpringUtils {
      * 判断一个类是否是 Spring Bean。
      */
     public static boolean isSpringBean(JClass jClass) {
-        return jClass.hasAnnotation(ComponentType.Component.getType()) ||
-                jClass.hasAnnotation(ComponentType.Service.getType()) ||
-                jClass.hasAnnotation(ComponentType.Repository.getType()) ||
-                jClass.hasAnnotation(ComponentType.Controller.getType());
+        return jClass.hasAnnotation(BeanAnnotationRules.Component.getType()) ||
+                jClass.hasAnnotation(BeanAnnotationRules.Service.getType()) ||
+                jClass.hasAnnotation(BeanAnnotationRules.Repository.getType()) ||
+                jClass.hasAnnotation(BeanAnnotationRules.Controller.getType());
     }
 
     /**
      * 获取注解中的bean名称
      */
 //    private String getComponentName(JClass jClass) {
-//        if (jClass.hasAnnotation(ComponentType.Service.getType()) &&
-//                Objects.requireNonNull(jClass.getAnnotation(ComponentType.Service.getType())).hasElement("value")) {
-//            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(ComponentType.Service.getType())).getElement("value")).toString();
-//        } else if (jClass.hasAnnotation(ComponentType.Component.getType()) &&
-//                Objects.requireNonNull(jClass.getAnnotation(ComponentType.Component.getType())).hasElement("value")) {
-//            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(ComponentType.Component.getType())).getElement("value")).toString();
+//        if (jClass.hasAnnotation(BeanAnnotationRules.Service.getType()) &&
+//                Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Service.getType())).hasElement("value")) {
+//            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Service.getType())).getElement("value")).toString();
+//        } else if (jClass.hasAnnotation(BeanAnnotationRules.Component.getType()) &&
+//                Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Component.getType())).hasElement("value")) {
+//            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Component.getType())).getElement("value")).toString();
 //        }
 //        // 默认使用类名首字母小写
 //        String className = jClass.getSimpleName();
@@ -206,30 +206,30 @@ public class SpringUtils {
 //    }
     public String getComponentName(JClass jClass) {
         // 检查是否有 @Service 注解并获取 value
-        if (jClass.hasAnnotation(ComponentType.Service.getType()) &&
-                Objects.requireNonNull(jClass.getAnnotation(ComponentType.Service.getType())).hasElement("value")) {
-            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(ComponentType.Service.getType()))
+        if (jClass.hasAnnotation(BeanAnnotationRules.Service.getType()) &&
+                Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Service.getType())).hasElement("value")) {
+            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Service.getType()))
                     .getElement("value")).toString();
         }
 
         // 检查是否有 @Component 注解并获取 value
-        if (jClass.hasAnnotation(ComponentType.Component.getType()) &&
-                Objects.requireNonNull(jClass.getAnnotation(ComponentType.Component.getType())).hasElement("value")) {
-            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(ComponentType.Component.getType()))
+        if (jClass.hasAnnotation(BeanAnnotationRules.Component.getType()) &&
+                Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Component.getType())).hasElement("value")) {
+            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Component.getType()))
                     .getElement("value")).toString();
         }
 
         // 检查是否有 @Repository 注解并获取 value
-        if (jClass.hasAnnotation(ComponentType.Repository.getType()) &&
-                Objects.requireNonNull(jClass.getAnnotation(ComponentType.Repository.getType())).hasElement("value")) {
-            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(ComponentType.Repository.getType()))
+        if (jClass.hasAnnotation(BeanAnnotationRules.Repository.getType()) &&
+                Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Repository.getType())).hasElement("value")) {
+            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Repository.getType()))
                     .getElement("value")).toString();
         }
 
         // 检查是否有 @Controller 注解并获取 value
-        if (jClass.hasAnnotation(ComponentType.Controller.getType()) &&
-                Objects.requireNonNull(jClass.getAnnotation(ComponentType.Controller.getType())).hasElement("value")) {
-            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(ComponentType.Controller.getType()))
+        if (jClass.hasAnnotation(BeanAnnotationRules.Controller.getType()) &&
+                Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Controller.getType())).hasElement("value")) {
+            return Objects.requireNonNull(Objects.requireNonNull(jClass.getAnnotation(BeanAnnotationRules.Controller.getType()))
                     .getElement("value")).toString();
         }
 
