@@ -1,10 +1,14 @@
 package org.example.spring;
 
 import org.example.utils.CallGraphPrinter;
+import org.example.utils.ICFGPrinter;
 import org.example.utils.SpringUtils;
 import org.example.utils.UrlPrinter;
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
+import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
+import pascal.taie.analysis.graph.icfg.ICFG;
+import pascal.taie.analysis.graph.icfg.ICFGBuilder;
 import pascal.taie.analysis.pta.PointerAnalysisResult;
 import pascal.taie.analysis.pta.core.cs.context.Context;
 import pascal.taie.analysis.pta.core.cs.element.*;
@@ -76,12 +80,14 @@ public class DICGConstructorPlugin implements Plugin {
                 solver.addEntryPoint(new EntryPoint(routerMethod.getJMethod(), EmptyParamProvider.get()));
             }
         }
+
     }
 
 
     @Override
     public void onNewCSMethod(CSMethod csMethod) {
         JMethod jMethod = csMethod.getMethod();
+//        System.out.println(jMethod.getRef());
         Context context = csMethod.getContext();
         if (isJdkCalls(jMethod)) {
             solver.addIgnoredMethod(csMethod.getMethod());
@@ -143,23 +149,25 @@ public class DICGConstructorPlugin implements Plugin {
     public void onFinish() {
         PointerAnalysisResult result = solver.getResult();
         //
-        JClass aClass = hierarchy.getClass("org.springframework.util.MultiValueMap");
-
         // output urls
         List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
         UrlPrinter urlPrinter = new UrlPrinter(routerAnalysis);
         urlPrinter.printUrls();
         // output cg
-        CallGraphPrinter callGraphPrinter = new CallGraphPrinter(solver.getCallGraph());
         CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
+        CallGraphPrinter callGraphPrinter = new CallGraphPrinter(callGraph);
         callGraph.entryMethods().forEach(csMethod -> {
             try {
                 callGraphPrinter.generateDotFile(csMethod);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
         });
+//        // TODO：output icfg
+//        ICFG<JMethod, Stmt> icfg = World.get().getResult(ICFGBuilder.ID);
+//        ICFGPrinter icfgPrinter = new ICFGPrinter(icfg);
+//        icfgPrinter.dumpICFG();
+
     }
 
 
@@ -195,7 +203,10 @@ public class DICGConstructorPlugin implements Plugin {
                 Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, beanInfo.getBeanClass().getType());
                 Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
                 solver.addVarPointsTo(context, var, heapContext, obj);
+                PointsToSet pointsToSet = solver.getCSManager().getCSVar(context, var).getPointsToSet();
                 processed = true;
+
+                break;
             }
         }
         return processed;
@@ -221,6 +232,7 @@ public class DICGConstructorPlugin implements Plugin {
                 Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
                 solver.addVarPointsTo(context, var, heapContext, obj);
                 processed = true;
+                break;
             }
         }
         return processed;
@@ -253,7 +265,6 @@ public class DICGConstructorPlugin implements Plugin {
                 if (beanInfo.getBeanClass().getName().equals(aClass.getName())){
                     intersection.add(aClass);
                 }
-                break;
             }
         }
 
@@ -261,6 +272,8 @@ public class DICGConstructorPlugin implements Plugin {
             Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, jClazz.getType());
             Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
             solver.addVarPointsTo(context, var, heapContext, obj);
+            CSVar csVar = solver.getCSManager().getCSVar(context, var);
+//            assert csVar != null;
         }
     }
 
