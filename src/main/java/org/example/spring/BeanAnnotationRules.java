@@ -18,17 +18,17 @@ public enum BeanAnnotationRules {
     Configuration("org.springframework.context.annotation.Configuration"),
     Bean("org.springframework.context.annotation.Bean"),
 
-    // Mybatis中的注解
+    // TODO:Mybatis中的注解
     Mapper("org.apache.ibatis.annotations.Mapper");
 
-    private final String componentType;
+    private final String annotationType;
 
-    BeanAnnotationRules(String componentType) {
-        this.componentType = componentType;
+    BeanAnnotationRules(String annotationType) {
+        this.annotationType = annotationType;
     }
 
     public String getType() {
-        return componentType;
+        return annotationType;
     }
 
 }
