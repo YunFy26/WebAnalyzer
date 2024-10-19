@@ -40,7 +40,7 @@ public class CallGraphPrinter {
 
         String directoryPath = "output/callFlows";
         Files.createDirectories(Paths.get(directoryPath));
-        String filename = directoryPath + "/" + entryMethod.getMethod().getDeclaringClass() + "#" + entryMethod.getMethod().getName() + ".dot";
+        String filename = directoryPath + "/" + entryMethod.getMethod().getDeclaringClass() + "." + entryMethod.getMethod().getName() + ".dot";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             writer.write(dotContent.toString());
         }
