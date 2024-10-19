@@ -76,14 +76,14 @@
   requires: [ throw(exception=explicit|all) ]
   options:
     exception: explicit # | null | all (includes implicit and explicit exceptions)
-    dump: false # dump control-flow graph
+    dump: true # dump control-flow graph
 
 - description: interprocedural control-flow graph
   analysisClass: pascal.taie.analysis.graph.icfg.ICFGBuilder
   id: icfg
   requires: [ cfg,cg ]
   options:
-    dump: false # dump inter-procedural control-flow graph
+    dump: true # dump inter-procedural control-flow graph
 
 - description: live variable analysis
   analysisClass: pascal.taie.analysis.dataflow.analysis.LiveVariable
@@ -175,7 +175,7 @@
   id: beanAnalysis
   requires: []
 
-#- description: entryPointCfg analysis
-#  analysisClass: org.example.spring.EntryPointCFGAnalysis
-#  id: entryPointCFG
-#  requires: [ ]
+- description: extract call flows (including control flows) from every entry points
+  analysisClass: org.example.spring.SplitIcfgFlows
+  id: splitIcfgFlows
+  requires: [ routerAnalysis, beanAnalysis, cfg, cg]
