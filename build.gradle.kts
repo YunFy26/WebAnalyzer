@@ -22,7 +22,7 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainClass.set("org.example.MyMain")
+    mainClass.set("org.example.Main")
 }
 
 val taieVersion = "0.5.1-SNAPSHOT" // or the latest version "0.5.1-SNAPSHOT"
@@ -31,7 +31,7 @@ tasks {
     jar {
         manifest {
             attributes(
-                "Main-Class" to "org.example.MyMain",  // 主类路径
+                "Main-Class" to "org.example.Main",  // 主类路径
                 "Tai-e-Version" to taieVersion,
             )
         }
