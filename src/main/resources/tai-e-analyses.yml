@@ -175,7 +175,7 @@
   id: beanAnalysis
   requires: []
 
-- description: extract call flows (including control flows) from every entry points
-  analysisClass: org.example.spring.SplitIcfgFlows
-  id: splitIcfgFlows
-  requires: [ routerAnalysis, beanAnalysis, cfg, cg]
+#- description: extract call flows (including control flows) from every entry points
+#  analysisClass: org.example.spring.SplitIcfgFlows
+#  id: splitIcfgFlows
+#  requires: [ routerAnalysis, beanAnalysis, cfg, cg]
