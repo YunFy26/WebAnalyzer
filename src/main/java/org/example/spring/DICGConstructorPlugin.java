@@ -1,5 +1,7 @@
 package org.example.spring;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.utils.CallGraphPrinter;
 import org.example.utils.ICFGPrinter;
 import org.example.utils.SpringUtils;
@@ -53,6 +55,8 @@ public class DICGConstructorPlugin implements Plugin {
 
     private Set<BeanInfo> beanInfoSet;
 
+    private final Logger logger = LogManager.getLogger(DICGConstructorPlugin.class);
+
     @Override
     public void setSolver(Solver solver) {
         this.solver = solver;
@@ -76,11 +80,10 @@ public class DICGConstructorPlugin implements Plugin {
         for (ControllerClass controllerClass: routerAnalysis){
             List<RouterMethod> routerMethods = controllerClass.getRouterMethods();
             for (RouterMethod routerMethod: routerMethods) {
-                // TODO: Mock parameter
+                // TODO: Mock parameter for taint analysis
                 solver.addEntryPoint(new EntryPoint(routerMethod.getJMethod(), EmptyParamProvider.get()));
             }
         }
-
     }
 
 
@@ -155,6 +158,7 @@ public class DICGConstructorPlugin implements Plugin {
         urlPrinter.printUrls();
         // output cg
         CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
+
         CallGraphPrinter callGraphPrinter = new CallGraphPrinter(callGraph);
         callGraph.entryMethods().forEach(csMethod -> {
             try {
@@ -163,11 +167,6 @@ public class DICGConstructorPlugin implements Plugin {
                 throw new RuntimeException(e);
             }
         });
-//        // TODO：output icfg
-//        ICFG<JMethod, Stmt> icfg = World.get().getResult(ICFGBuilder.ID);
-//        ICFGPrinter icfgPrinter = new ICFGPrinter(icfg);
-//        icfgPrinter.dumpICFG();
-
     }
 
 
@@ -203,9 +202,8 @@ public class DICGConstructorPlugin implements Plugin {
                 Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, beanInfo.getBeanClass().getType());
                 Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
                 solver.addVarPointsTo(context, var, heapContext, obj);
-                PointsToSet pointsToSet = solver.getCSManager().getCSVar(context, var).getPointsToSet();
+//                PointsToSet pointsToSet = solver.getCSManager().getCSVar(context, var).getPointsToSet();
                 processed = true;
-
                 break;
             }
         }
