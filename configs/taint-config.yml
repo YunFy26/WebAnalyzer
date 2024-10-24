@@ -1,0 +1,28 @@
+sources:
+  - { kind: call, method: "<javax.servlet.ServletRequestWrapper: java.lang.String getParameter(java.lang.String)>", index: result }
+  - { kind: param, method: "<org.example.springtest.CommandExecClass: java.lang.String index(jakarta.servlet.http.HttpServletRequest)>", index: 0}
+sinks:
+  - { vuln: "SQL Injection", level: 4, method: "<java.sql.Statement: java.sql.ResultSet executeQuery(java.lang.String)>", index: 0 }
+  - { vuln: "SQL Injection", level: 4, method: "<java.sql.Connection: java.sql.PreparedStatement prepareStatement(java.lang.String)>", index: 0 }
+  - { vuln: "Server-side request forgery", level: 3, method: "<org.springframework.web.client.RestTemplate: org.springframework.http.ResponseEntity exchange(java.lang.String,org.springframework.http.HttpMethod,org.springframework.http.HttpEntity,java.lang.Class,java.lang.Object[])>", index: 0 }
+  - { vuln: "Test", level: 4, method: "<org.example.springtest.FieldInjection: java.lang.String sayInjection()>", index: 0 }
+transfers:
+  - { method: "<java.lang.String: java.lang.String concat(java.lang.String)>", from: base, to: result }
+  - { method: "<java.lang.String: java.lang.String concat(java.lang.String)>", from: 0, to: result }
+  - { method: "<java.lang.String: char[] toCharArray()>", from: base, to: result }
+  - { method: "<java.lang.String: void <init>(char[])>", from: 0, to: base }
+  - { method: "<java.lang.String: void getChars(int,int,char[],int)>", from: base, to: 2 }
+  - { method: "<java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>", from: "1[*]", to: result }
+  - { method: "<java.lang.StringBuffer: void <init>(java.lang.String)>", from: 0, to: base }
+  - { method: "<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>", from: 0, to: base }
+  - { method: "<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>", from: 0, to: result }
+  - { method: "<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>", from: base, to: result }
+  - { method: "<java.lang.StringBuffer: java.lang.String toString()>", from: base, to: result }
+  - { method: "<java.lang.StringBuilder: void <init>(java.lang.String)>", from: 0, to: base }
+  - { method: "<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>", from: 0, to: base }
+  - { method: "<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>", from: 0, to: result }
+  - { method: "<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>", from: base, to: result }
+  - { method: "<java.lang.StringBuilder: java.lang.String toString()>", from: base, to: result }
+
+call-site-mode: true
+

@@ -2,11 +2,11 @@ optionsFile: null
 printHelp: false
 # WebGoat libs
 classPath :
-  - WebGoat/BOOT-INF/lib
-#  - /Users/yuntsy/My/Projects/Java/SpringTest/build/libs/BOOT-INF/lib
+#  - WebGoat/BOOT-INF/lib
+  - /Users/yuntsy/My/Projects/Java/SpringTest/build/libs/BOOT-INF/lib
 # appClass
-appClassPath: [WebGoat/BOOT-INF/classes]
-#appClassPath: [/Users/yuntsy/My/Projects/Java/SpringTest/build/classes/java/main]
+#appClassPath: [WebGoat/BOOT-INF/classes]
+appClassPath: [/Users/yuntsy/My/Projects/Java/SpringTest/build/classes/java/main]
 mainClass:
 inputClasses: []
 javaVersion: 17
@@ -16,7 +16,7 @@ worldBuilderClass: pascal.taie.frontend.soot.SootWorldBuilder
 outputDir: output
 preBuildIR: false
 worldCacheMode: false
-scope: REACHABLE
+scope: APP
 nativeModel: true
 planFile: null
 analyses:
@@ -26,6 +26,7 @@ analyses:
   cg: ""
 #  cfg: ""
 #  icfg: ""
+#  splitIcfgFlows: ""
   pta: "plugins:[org.example.spring.DICGConstructorPlugin]"
 onlyGenPlan: false
 keepResult:
