@@ -11,7 +11,7 @@ import pascal.taie.ir.stmt.Stmt;
 import pascal.taie.language.classes.JMethod;
 
 /**
- * output the call flow containing control flow information for each entry point
+ * output the icfg for each entry point
  */
 public class SplitIcfgFlows extends ProgramAnalysis {
 
