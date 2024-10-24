@@ -2,17 +2,8 @@ package org.example;
 
 
 import org.apache.commons.cli.*;
-import org.example.llm.DefaultLLMConnector;
-import pascal.taie.World;
-import pascal.taie.analysis.graph.callgraph.CallGraph;
-import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
-import pascal.taie.analysis.graph.callgraph.DefaultCallGraph;
-import pascal.taie.ir.stmt.Invoke;
-import pascal.taie.language.classes.JMethod;
 
-import java.text.ParseException;
-
-public class MyMain {
+public class Main {
 
     public static void main(String[] args) {
 
