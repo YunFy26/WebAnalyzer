@@ -1,19 +1,17 @@
-package org.example.utils;
+package org.example.printer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pascal.taie.World;
-import pascal.taie.analysis.graph.callgraph.CallGraph;
 import pascal.taie.analysis.graph.cfg.CFG;
 import pascal.taie.analysis.graph.cfg.CFGBuilder;
 import pascal.taie.analysis.graph.cfg.CFGDumper;
 import pascal.taie.analysis.graph.icfg.*;
 import pascal.taie.ir.stmt.Stmt;
 import pascal.taie.language.classes.JMethod;
+import pascal.taie.language.type.Type;
 import pascal.taie.util.Indexer;
 import pascal.taie.util.SimpleIndexer;
-import pascal.taie.util.graph.DotAttributes;
-import pascal.taie.util.graph.DotDumper;
 
 
 import java.io.File;
@@ -23,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class ICFGPrinter {
@@ -40,7 +39,14 @@ public class ICFGPrinter {
 
     public void dumpICFG() {
         icfg.entryMethods().forEach(entryMethod -> {
-            String fileName = entryMethod.getDeclaringClass().getName() + "." + entryMethod.getName() + ".dot";
+//            String fileName = entryMethod.getDeclaringClass().getName() + "." + entryMethod.getName() + ".dot";
+            String fileName = String.valueOf(entryMethod.getDeclaringClass()) + '.' +
+                    entryMethod.getName() + '(' +
+                    entryMethod.getParamTypes()
+                            .stream()
+                            .map(Type::toString)
+                            .collect(Collectors.joining(",")) +
+                    ')'+ ".dot";
             File outputDir = new File(World.get().getOptions().getOutputDir(), "callFlowsWithCFG");
             if (!outputDir.exists()) {
                 boolean created = outputDir.mkdirs();
