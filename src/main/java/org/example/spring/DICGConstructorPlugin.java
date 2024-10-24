@@ -1,7 +1,16 @@
 package org.example.spring;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.example.utils.CallGraphPrinter;
+import org.example.utils.ICFGPrinter;
+import org.example.utils.SpringUtils;
+import org.example.utils.UrlPrinter;
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
+import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
+import pascal.taie.analysis.graph.icfg.ICFG;
+import pascal.taie.analysis.graph.icfg.ICFGBuilder;
 import pascal.taie.analysis.pta.PointerAnalysisResult;
 import pascal.taie.analysis.pta.core.cs.context.Context;
 import pascal.taie.analysis.pta.core.cs.element.*;
@@ -12,19 +21,18 @@ import pascal.taie.analysis.pta.core.solver.EntryPoint;
 import pascal.taie.analysis.pta.core.solver.Solver;
 import pascal.taie.analysis.pta.core.heap.HeapModel;
 import pascal.taie.analysis.pta.plugin.Plugin;
+import pascal.taie.analysis.pta.pts.PointsToSet;
 import pascal.taie.ir.exp.*;
 import pascal.taie.ir.stmt.*;
-import pascal.taie.language.annotation.Annotation;
 import pascal.taie.language.classes.ClassHierarchy;
 import pascal.taie.language.classes.JClass;
 import pascal.taie.language.classes.JField;
 import pascal.taie.language.classes.JMethod;
-import pascal.taie.language.type.Type;
 import pascal.taie.language.type.TypeSystem;
 
 import java.io.IOException;
+import java.lang.invoke.CallSite;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Add routerMethods in ControllerClass as new entry points
@@ -46,6 +54,8 @@ public class DICGConstructorPlugin implements Plugin {
     private SpringUtils springUtils;
 
     private Set<BeanInfo> beanInfoSet;
+
+    private final Logger logger = LogManager.getLogger(DICGConstructorPlugin.class);
 
     @Override
     public void setSolver(Solver solver) {
@@ -70,117 +80,97 @@ public class DICGConstructorPlugin implements Plugin {
         for (ControllerClass controllerClass: routerAnalysis){
             List<RouterMethod> routerMethods = controllerClass.getRouterMethods();
             for (RouterMethod routerMethod: routerMethods) {
+                // TODO: Mock parameter for taint analysis
                 solver.addEntryPoint(new EntryPoint(routerMethod.getJMethod(), EmptyParamProvider.get()));
             }
         }
-
-//        for (BeanInfo beanInfo: beanInfoSet) {
-//            System.out.println(beanInfo.toString());
-//        }
-
     }
 
 
     @Override
     public void onNewCSMethod(CSMethod csMethod) {
         JMethod jMethod = csMethod.getMethod();
-//        System.out.println(jMethod.getDeclaringClass().getName());
+//        System.out.println(jMethod.getRef());
         Context context = csMethod.getContext();
         if (isJdkCalls(jMethod)) {
-            return;
+            solver.addIgnoredMethod(csMethod.getMethod());
         }
         List<Stmt> stmts = jMethod.getIR().getStmts();
         HashMap<Var, JField> varField = new HashMap<>();
+        List<Invoke> invokeInstanceExps = new ArrayList<>();
         for (Stmt stmt: stmts) {
+            // 遍历方法中所有的LoadField语句，将变量跟被加载的field做一个映射
             if(stmt instanceof LoadField loadField){
                 Var lValue = loadField.getLValue();
                 JField field = loadField.getFieldRef().resolve();
                 varField.put(lValue, field);
-                Collection<Annotation> annotations = field.getAnnotations();
-                // 首先处理Field Injection，为所有由Field Injection注入的Field更新指针集
-                if (springUtils.isDependencyInjectionField(field)){
-//                    System.out.println(field.getName());
-                    String specifyName = springUtils.processFieldInjection(field);
-//                    boolean processed = false;
-                    for (BeanInfo beanInfo: beanInfoSet){
-                        if (specifyName.equals(beanInfo.getFromAnnotationName()) || specifyName.equals(beanInfo.getDefaultName())){
-                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), beanInfo.getBeanClass().getType());
-                            Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
-                            solver.addVarPointsTo(context, lValue, heapContext, obj);
-//                            processed = true;
-                        }
-                    }
-//                    // TODO
-                }
             }
-            // 处理setter Injection 和 constructor Injection
-            if(stmt instanceof Invoke invoke){
+            // 获取方法中所有调用语句 --> 实例调用
+            if (stmt instanceof Invoke invoke){
                 if (invoke.isInterface() || invoke.isVirtual()){
                     InvokeExp invokeExp = invoke.getRValue();
-                    if (invokeExp instanceof InvokeInstanceExp invokeInstanceExp){
-                        Var base = invokeInstanceExp.getBase();
-                        base.getName();
-                        if (solver.getCSManager().getCSVar(context, base).getPointsToSet() == null || Objects.requireNonNull(solver.getCSManager().getCSVar(context, base).getPointsToSet()).isEmpty()){
-                            if(!base.getName().equals("%this")){
-                                // 变量对应的field
-                                JField field = varField.get(base);
-                                boolean processed = false;
-                                if (field != null){
-                                    String fieldName = field.getName();
-                                    // 按照fieldName名称匹配注入的bean
-                                    for (BeanInfo beanInfo : beanInfoSet){
-                                        if (beanInfo.getDefaultName().equals(fieldName)){
-                                            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", field.getRef(), beanInfo.getBeanClass().getType());
-                                            Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
-                                            solver.addVarPointsTo(context, base, heapContext, obj);
-                                            processed = true;
-                                        }
-                                    }
-                                }
-                                if (!processed){
-
-                                }
-                            }else {
-                                Type type = base.getType();
-                                JClass aClass = hierarchy.getClass(type.getName());
-                                if (aClass != null){
-                                    Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", base.getName(), aClass.getType());
-                                    Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
-                                    solver.addVarPointsTo(context, base, heapContext, obj);
-                                }
-                            }
-                        }
+                    if (invokeExp instanceof InvokeInstanceExp){
+                        invokeInstanceExps.add(invoke);
                     }
                 }
             }
         }
+
+        for (Invoke invoke : invokeInstanceExps){
+            InvokeInstanceExp invokeInstanceExp = (InvokeInstanceExp) invoke.getRValue();
+            Var base = invokeInstanceExp.getBase();
+            PointsToSet pointsToSet = solver.getCSManager().getCSVar(context, base).getPointsToSet();
+            if (pointsToSet == null || pointsToSet.isEmpty()){
+                if (!"%this".equals(base.getName())){
+                    JField field = varField.get(base);
+                    boolean processed;
+                    if(field != null){
+                        // process Field Injection
+                        if (springUtils.isDependencyInjectionField(field)){
+                            processed = processFieldInjection(csMethod, field, base, invoke);
+                        }
+                        // process Setter and Constructor Injection
+                        else {
+                            processed = processOtherInjection(csMethod, field, base, invoke);
+                        }
+                        if (!processed){
+                            processByType(csMethod, field, base, invoke);
+                        }
+                    }
+                }else {
+                    processThis(csMethod, base, invoke);
+                }
+
+            }
+        }
+
+
     }
 
 
     @Override
     public void onFinish() {
-        // 输出url路径及对应的入口方法
+        PointerAnalysisResult result = solver.getResult();
+        //
+        // output urls
         List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
-        for (ControllerClass controllerClass: routerAnalysis){
-            controllerClass.printUrls();
-        }
-        // 输出Beans
-
-        // 输出调用流
+        UrlPrinter urlPrinter = new UrlPrinter(routerAnalysis);
+        urlPrinter.printUrls();
+        // output cg
         CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
-        Stream<CSMethod> csMethodStream = callGraph.entryMethods();
-        CallGraphExplorer callGraphExplorer = new CallGraphExplorer(callGraph);
-        csMethodStream.forEach(csMethod -> {
+
+        CallGraphPrinter callGraphPrinter = new CallGraphPrinter(callGraph);
+        callGraph.entryMethods().forEach(csMethod -> {
             try {
-                callGraphExplorer.generateDotFile(csMethod);
+                callGraphPrinter.generateDotFile(csMethod);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
     }
 
 
-    public boolean isJdkCalls(JMethod jMethod) {
+    private boolean isJdkCalls(JMethod jMethod) {
         String packageName = jMethod.getDeclaringClass().getName();
         return packageName.startsWith("java.") ||
                 packageName.startsWith("javax.") ||
@@ -190,6 +180,114 @@ public class DICGConstructorPlugin implements Plugin {
                 packageName.startsWith("org.w3c.dom");
 //                packageName.startsWith("com.apple") ||
 //                packageName.startsWith("apple");
+    }
+
+    /**
+     * processFieldInjection 处理Field Injection类型
+     *
+     * @param csMethod  注入点所在的方法
+     * @param field  注入点
+     * @param var    跟注入点相关的变量
+     * @param invoke 跟变量相关的调用语句
+     * @return 是否成功处理
+     */
+    private boolean processFieldInjection(CSMethod csMethod, JField field, Var var, Invoke invoke){
+        boolean processed = false;
+        Context context = csMethod.getContext();
+        InvokeExp invokeExp = invoke.getRValue();
+        InjectionPoint injectionPoint = new InjectionPoint(field);
+        String specifyName = injectionPoint.getSpecifyName();
+        for (BeanInfo beanInfo : beanInfoSet){
+            if (specifyName.equals(beanInfo.getFromAnnotationName()) || specifyName.equals(beanInfo.getDefaultName())){
+                Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, beanInfo.getBeanClass().getType());
+                Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
+                solver.addVarPointsTo(context, var, heapContext, obj);
+//                PointsToSet pointsToSet = solver.getCSManager().getCSVar(context, var).getPointsToSet();
+                processed = true;
+                break;
+            }
+        }
+        return processed;
+    }
+
+    /**
+     * processOntherInjection 处理 Setter, Constructor Injection
+     *
+     * @param csMethod  注入点所在的方法
+     * @param field  注入点
+     * @param var    跟注入点相关的变量
+     * @param invoke 跟变量相关的调用语句
+     * @return 是否成功处理
+     */
+    private boolean processOtherInjection(CSMethod csMethod, JField field, Var var, Invoke invoke){
+        boolean processed = false;
+        Context context = csMethod.getContext();
+        InvokeExp invokeExp = invoke.getRValue();
+        String fieldName = field.getName();
+        for (BeanInfo beanInfo : beanInfoSet){
+            if (fieldName.equals(beanInfo.getDefaultName()) || fieldName.equals(beanInfo.getFromAnnotationName())){
+                Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, beanInfo.getBeanClass().getType());
+                Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
+                solver.addVarPointsTo(context, var, heapContext, obj);
+                processed = true;
+                break;
+            }
+        }
+        return processed;
+    }
+
+
+    /**
+     * processByType 当按照名称查找对应的bean没有找到时，按照类型去查找bean，然后mock
+     * @param csMethod
+     * @param field
+     * @param var
+     * @param invoke
+     */
+    private void processByType(CSMethod csMethod, JField field, Var var, Invoke invoke){
+        Context context = csMethod.getContext();
+        InvokeExp invokeExp = invoke.getRValue();
+        String type = field.getType().getName();
+        JClass jClass = hierarchy.getClass(type);
+        Collection<JClass> implementors = new HashSet<>();
+        if (jClass != null){
+            if (jClass.isInterface()){
+                implementors.addAll(hierarchy.getDirectImplementorsOf(jClass));
+            }else {
+                implementors.addAll(hierarchy.getAllSubclassesOf(jClass));
+            }
+        }
+        Collection<JClass> intersection = new HashSet<>();
+        for (JClass aClass : implementors){
+            for(BeanInfo beanInfo : beanInfoSet){
+                if (beanInfo.getBeanClass().getName().equals(aClass.getName())){
+                    intersection.add(aClass);
+                }
+            }
+        }
+
+        for (JClass jClazz : intersection){
+            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, jClazz.getType());
+            Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
+            solver.addVarPointsTo(context, var, heapContext, obj);
+            CSVar csVar = solver.getCSManager().getCSVar(context, var);
+//            assert csVar != null;
+        }
+    }
+
+    /**
+     * 处理this变量
+     */
+    private void processThis(CSMethod csMethod, Var var, Invoke invoke){
+        Context context = csMethod.getContext();
+        InvokeExp invokeExp = invoke.getRValue();
+        String type = var.getType().getName();
+        JClass jClass = hierarchy.getClass(type);
+        if (jClass != null){
+            Obj obj = heapModel.getMockObj(() -> "DependencyInjectionObj", invoke.getContainer() + ":" + invokeExp, jClass.getType());
+            Context heapContext = contextSelector.selectHeapContext(csMethod, obj);
+            solver.addVarPointsTo(context, var, heapContext, obj);
+        }
     }
 
 }

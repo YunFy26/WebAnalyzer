@@ -1,6 +1,6 @@
 package org.example.spring;
 
-public enum DependencyInjectionType {
+public enum InjectionAnnotationRules {
     // 根据类型注入
     Autowired("org.springframework.beans.factory.annotation.Autowired"),
     Inject("javax.inject.Inject"),
@@ -16,7 +16,7 @@ public enum DependencyInjectionType {
 
     private final String annotationType;
 
-    DependencyInjectionType(String annotationType) {
+    InjectionAnnotationRules(String annotationType) {
         this.annotationType = annotationType;
     }
 

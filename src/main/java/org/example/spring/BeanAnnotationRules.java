@@ -1,6 +1,6 @@
 package org.example.spring;
 
-public enum ComponentType {
+public enum BeanAnnotationRules {
 
     // 通用注解，表示是Bean
     Component("org.springframework.stereotype.Component"),
@@ -18,17 +18,17 @@ public enum ComponentType {
     Configuration("org.springframework.context.annotation.Configuration"),
     Bean("org.springframework.context.annotation.Bean"),
 
-    // Mybatis中的注解
+    // TODO:Mybatis中的注解
     Mapper("org.apache.ibatis.annotations.Mapper");
 
-    private final String componentType;
+    private final String annotationType;
 
-    ComponentType(String componentType) {
-        this.componentType = componentType;
+    BeanAnnotationRules(String annotationType) {
+        this.annotationType = annotationType;
     }
 
     public String getType() {
-        return componentType;
+        return annotationType;
     }
 
 }

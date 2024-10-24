@@ -23,7 +23,7 @@ analyses:
   ir-dumper: ;
   routerAnalysis: ""
   beanAnalysis: ""
-#  cg: ""
+  cg: ""
 #  cfg: ""
 #  icfg: ""
   pta: "plugins:[org.example.spring.DICGConstructorPlugin]"

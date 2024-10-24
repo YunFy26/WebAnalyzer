@@ -2,6 +2,8 @@ package org.example.spring;
 
 import pascal.taie.language.classes.JClass;
 
+import java.util.Objects;
+
 /**
  * Custom structure for storing bean information.
  */
@@ -43,5 +45,21 @@ public class BeanInfo {
                 ", defaultName='" + defaultName + '\'' +
                 ", fromAnnotationName='" + fromAnnotationName + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BeanInfo beanInfo = (BeanInfo) o;
+        return Objects.equals(beanClass, beanInfo.beanClass) &&
+                Objects.equals(defaultName, beanInfo.defaultName) &&
+                Objects.equals(fromAnnotationName, beanInfo.fromAnnotationName);
+    }
+
+    // Override hashCode to generate a hash based on beanClass, defaultName, and fromAnnotationName
+    @Override
+    public int hashCode() {
+        return Objects.hash(beanClass, defaultName, fromAnnotationName);
     }
 }
