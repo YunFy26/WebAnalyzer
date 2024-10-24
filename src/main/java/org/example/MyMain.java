@@ -2,6 +2,13 @@ package org.example;
 
 
 import org.apache.commons.cli.*;
+import org.example.llm.DefaultLLMConnector;
+import pascal.taie.World;
+import pascal.taie.analysis.graph.callgraph.CallGraph;
+import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
+import pascal.taie.analysis.graph.callgraph.DefaultCallGraph;
+import pascal.taie.ir.stmt.Invoke;
+import pascal.taie.language.classes.JMethod;
 
 import java.text.ParseException;
 
@@ -15,18 +22,24 @@ public class MyMain {
         optionFile.setRequired(true);
         options.addOption(optionFile);
 
+        Option enableLLMOption = new Option("e", "enable-llm", false, "启用 LLM 进行漏洞检测");
+        enableLLMOption.setRequired(false);
+        options.addOption(enableLLMOption);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
 
         String optionsFilePath;
+        boolean enableLLM = false;
 
         try {
-            // 解析命令行参数
             cmd = parser.parse(options, args);
-
-            // 获取 --options-file 参数的值
             optionsFilePath = cmd.getOptionValue("options-file");
+            if (cmd.hasOption("enable-llm") || cmd.hasOption("e")) {
+                String enableLLMValue = cmd.getOptionValue("enable-llm");
+                enableLLM = Boolean.parseBoolean(enableLLMValue);
+            }
 
         } catch (org.apache.commons.cli.ParseException e) {
             System.out.println("错误: " + e.getMessage());
@@ -39,6 +52,12 @@ public class MyMain {
                 "--options-file",
                 optionsFilePath
         );
+//        if (enableLLM){
+//            CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
+//            DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
+//        }
+
+
     }
 
 
