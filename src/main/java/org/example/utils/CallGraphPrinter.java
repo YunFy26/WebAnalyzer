@@ -16,15 +16,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CallGraphPrinter {
+
     private final CallGraph<CSCallSite, CSMethod> callGraph;
+
     private final Indexer<JMethod> methodIndexer;
+
 
     public CallGraphPrinter(CallGraph<CSCallSite, CSMethod> callGraph) {
         this.callGraph = callGraph;
         this.methodIndexer = new SimpleIndexer<>();
     }
 
-    public void generateDotFile(CSMethod entryMethod) throws IOException {
+    public String dotContent(CSMethod entryMethod){
         Set<String> visited = new HashSet<>();
         Set<String> addedEdges = new HashSet<>();
         StringBuilder nodesContent = new StringBuilder();
@@ -37,12 +40,29 @@ public class CallGraphPrinter {
         dotContent.append(nodesContent);
         dotContent.append(edgesContent);
         dotContent.append("}\n");
+        return dotContent.toString();
+    }
+
+    public void generateDotFile(CSMethod entryMethod) throws IOException {
+        String dotContent = dotContent(entryMethod);
+//        Set<String> visited = new HashSet<>();
+//        Set<String> addedEdges = new HashSet<>();
+//        StringBuilder nodesContent = new StringBuilder();
+//        StringBuilder edgesContent = new StringBuilder();
+//        StringBuilder dotContent = new StringBuilder("digraph G {\n");
+//        dotContent.append("node [color=\".3 .2 1.0\",shape=box,style=filled];\n");
+//        dotContent.append("edge [];\n");
+//        explore(entryMethod, visited, addedEdges, nodesContent, edgesContent);
+//
+//        dotContent.append(nodesContent);
+//        dotContent.append(edgesContent);
+//        dotContent.append("}\n");
 
         String directoryPath = "output/callFlows";
         Files.createDirectories(Paths.get(directoryPath));
         String filename = directoryPath + "/" + entryMethod.getMethod().getDeclaringClass() + "." + entryMethod.getMethod().getName() + ".dot";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write(dotContent.toString());
+            writer.write(dotContent);
         }
     }
 
