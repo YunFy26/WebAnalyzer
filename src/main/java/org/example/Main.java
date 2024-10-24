@@ -2,6 +2,7 @@ package org.example;
 
 
 import org.apache.commons.cli.*;
+import org.example.printer.OutputPrinter;
 
 public class Main {
 
@@ -33,9 +34,9 @@ public class Main {
             }
 
         } catch (org.apache.commons.cli.ParseException e) {
-            System.out.println("错误: " + e.getMessage());
-            formatter.printHelp("--options-file=<path>", options);  // 打印帮助信息
-            System.exit(1);  // 退出程序
+            System.out.println("Error: " + e.getMessage());
+            formatter.printHelp("--options-file=<path>", options);
+            System.exit(1);
             return;
         }
 
@@ -43,10 +44,16 @@ public class Main {
                 "--options-file",
                 optionsFilePath
         );
+        // Output
+        OutputPrinter.outputUrls();
+        OutputPrinter.outputCallFlows();
+        OutputPrinter.outputIcfg();
 //        if (enableLLM){
 //            CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
 //            DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
 //        }
+
+
 
 
     }
