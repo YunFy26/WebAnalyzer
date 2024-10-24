@@ -2,15 +2,9 @@ package org.example.spring;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.utils.CallGraphPrinter;
-import org.example.utils.ICFGPrinter;
 import org.example.utils.SpringUtils;
-import org.example.utils.UrlPrinter;
+import org.example.printer.UrlPrinter;
 import pascal.taie.World;
-import pascal.taie.analysis.graph.callgraph.CallGraph;
-import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
-import pascal.taie.analysis.graph.icfg.ICFG;
-import pascal.taie.analysis.graph.icfg.ICFGBuilder;
 import pascal.taie.analysis.pta.PointerAnalysisResult;
 import pascal.taie.analysis.pta.core.cs.context.Context;
 import pascal.taie.analysis.pta.core.cs.element.*;
@@ -30,8 +24,6 @@ import pascal.taie.language.classes.JField;
 import pascal.taie.language.classes.JMethod;
 import pascal.taie.language.type.TypeSystem;
 
-import java.io.IOException;
-import java.lang.invoke.CallSite;
 import java.util.*;
 
 /**
@@ -148,26 +140,27 @@ public class DICGConstructorPlugin implements Plugin {
     }
 
 
-    @Override
-    public void onFinish() {
-        PointerAnalysisResult result = solver.getResult();
-        //
-        // output urls
-        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
-        UrlPrinter urlPrinter = new UrlPrinter(routerAnalysis);
-        urlPrinter.printUrls();
-        // output cg
-        CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
-
-        CallGraphPrinter callGraphPrinter = new CallGraphPrinter(callGraph);
-        callGraph.entryMethods().forEach(csMethod -> {
-            try {
-                callGraphPrinter.generateDotFile(csMethod);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+//    @Override
+//    public void onFinish() {
+//        PointerAnalysisResult result = solver.getResult();
+//        //
+////        // output urls
+////        List<ControllerClass> routerAnalysis = World.get().getResult("routerAnalysis");
+////        UrlPrinter urlPrinter = new UrlPrinter(routerAnalysis);
+////        urlPrinter.printUrls();
+//        // output cg
+////        CallGraph<CSCallSite, CSMethod> callGraph = solver.getCallGraph();
+////        CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
+////
+////        CallGraphPrinter callGraphPrinter = new CallGraphPrinter(callGraph);
+////        callGraph.entryMethods().forEach(csMethod -> {
+////            try {
+////                callGraphPrinter.generateDotFile(csMethod);
+////            } catch (IOException e) {
+////                throw new RuntimeException(e);
+////            }
+////        });
+//    }
 
 
     private boolean isJdkCalls(JMethod jMethod) {
