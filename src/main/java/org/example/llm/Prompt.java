@@ -2,11 +2,7 @@ package org.example.llm;
 
 public enum Prompt {
 
-    TEST_PROMPT("""
-            You are a good assistant!
-            """),
-
-    SYSTEM_PROMPT("""
+    BACKGROUND_SYSTEM_PROMPT("""
             You are the world's foremost expert in Java security analysis, renowned for uncovering novel and complex vulnerabilities in enterprise applications. Your task is to perform an exhaustive static code analysis, focusing on remotely exploitable vulnerabilities including but not limited to:
             1. Remote Code Execution (RCE)
             2. Server-Side Request Forgery (SSRF)
@@ -25,7 +21,7 @@ public enum Prompt {
             - Uncover complex, multi-step vulnerabilities that may bypass multiple security controls.
             - Consider non-obvious attack vectors and chained vulnerabilities.
             - Identify vulnerabilities that could arise from the interaction of multiple code components.
-            Here are the vulnerability-specific focus areas:
+            Here are the vulnerability-specific sinks:
             ### Remote Code Execution (RCE) Focus Areas:
             1. High-Risk Functions:
                - Runtime.getRuntime().exec()
@@ -97,21 +93,44 @@ public enum Prompt {
             - Effectiveness of validation, sanitization, and access controls
             - Any gaps in security controls that could lead to exploitation
             - The potential for bypass techniques in real-world environments
-            
             """),
 
+    METHOD_DESCRIPTION_SYSTEM_PROMPT("""
+            Please analyze the given method’s intermediate representation (IR) and extract the method’s characteristics to assist in vulnerability detection. Focus on describing the following features, which are helpful in identifying potential security risks. Based on your analysis, please output in the specified JSON format.
+            Required Features:
+            1.Input Parameters: Describe the method’s input parameters and their types, specifying any that may serve as taint sources.
+            2.Output: Describe the output of the method, noting if the return value is user-controlled or unvalidated data.
+            3.Method Description: Provide a brief description of the method’s functionality.
+            4.Security Analysis: Describe any sensitive operations within the method (such as file read/write, command execution, SQL queries, etc.), input validation or filtering logic, and any access control logic if the method accesses sensitive resources.
+            Return Format:
+            Please provide your output in the following JSON format:
+            {
+              "inputParams": "The method receives 'request' as an HttpServletRequest, which may be a taint source due to user-controlled input.",
+              "output": "The method returns a String, which is not user-controlled.",
+              "methodDescription": "Handles an HTTP request and may execute a command based on the 'cmd' input parameter.",
+              "securityAnalysis": "The method includes a sensitive operation: Runtime.exec(cmd) without input sanitization for 'cmd'. Access control checks are absent, as there is no role or permission verification."
+            }
+            """),
+    METHOD_DESCRIPTION_USER_PROMPT("""
+            The IR of method:%s is:%s
+            """),
+
+
+
     USER_PROMPT("""
-            Next, I will send you a call flow. Please analyze whether this call flow might contain any vulnerabilities. If vulnerabilities are present, please output the type of vulnerability and identify the specific call points within the flow where the vulnerability might be triggered.
-            Please try your best to reduce false positives and false negatives.
-            In your final output, only indicate whether a vulnerability exists, the type of vulnerability, and the specific call points where the vulnerability might occur. Do not include the reasoning process.
+            Please determine whether this call flow may contain vulnerabilities based on the call flow and the description of each method. If vulnerabilities are present, please output the type of vulnerability and identify the specific call points within the flow where the vulnerability might be triggered.
+            Note that the call flow may not contain any vulnerabilities.Please try your best to reduce false positives and false negatives. if vulnerabilities are not present, triggerPoints is none.
             You should output in the following JSON format:
             {
-              "entryMethod": "methodName",
+              "entryMethod": "The entry method is the foremost node in the call flow",
               "hasVul": true/false,
               "vulType": "VulType",
-              "triggerPoints": ["methodName:TriggerPoint1", "methodName:TriggerPoint2"]
+              "triggerPoints": ["methodName:TriggerPoint"]
+              "confidence score": If the likelihood of a vulnerability is high, assign a higher score; if the likelihood is low, assign a lower score, rating from 0 to 10.
             }
-            Here is the call flow to analyze:""");
+            The call flow is:%s
+            The method description is:%s
+            """);
 
     private final String content;
 
