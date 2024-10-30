@@ -53,7 +53,9 @@ public abstract class AbstractModelClient {
             // handle response
             return handleResponse(response.body());
         }else {
-            throw new RuntimeException("Field to request, the status code：" + response.statusCode());
+            String errorMessage = String.format("Request failed with status code: %d, response body: %s",
+                    response.statusCode(), response.body());
+            throw new RuntimeException(errorMessage);
         }
 
     };
