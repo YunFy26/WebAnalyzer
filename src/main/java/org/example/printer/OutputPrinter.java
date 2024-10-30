@@ -31,9 +31,9 @@ public class OutputPrinter {
         logger.info("Output the call flow of each entry method to output/callFlows.");
         CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
         CallGraphPrinter callGraphPrinter = new CallGraphPrinter(callGraph);
-        callGraph.entryMethods().forEach(csMethod -> {
+        callGraph.entryMethods().forEach(jMethod -> {
             try {
-                callGraphPrinter.generateDotFile(csMethod);
+                callGraphPrinter.generateDotFile(jMethod);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
