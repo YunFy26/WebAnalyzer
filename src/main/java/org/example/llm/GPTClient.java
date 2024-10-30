@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GPTModel extends BaseModel {
+public class GPTClient extends AbstractModelClient {
 
     private final String modelName;
 
@@ -19,7 +19,7 @@ public class GPTModel extends BaseModel {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public GPTModel(String apiKey, String apiUrl) {
+    public GPTClient(String apiKey, String apiUrl) {
         super(apiKey, apiUrl);
         this.modelName = "gpt-3.5-turbo";
         this.maxTokens = 8192;
@@ -27,9 +27,17 @@ public class GPTModel extends BaseModel {
         this.systemPrompt = Prompt.SYSTEM_PROMPT.getContent();
     }
 
+    @Override
+    protected Map<String, String> buildHeader() {
+        return Map.of(
+                "Content-Type", "application/json",
+                "Authorization", "Bearer " + apiKey
+        );
+    }
+
 
     @Override
-    protected String buildRequestBody(String userPrompt) throws Exception {
+    protected String buildRequestBody(String systemPrompt, String userPrompt) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", this.modelName);
         requestBody.put("messages", new Object[] {
