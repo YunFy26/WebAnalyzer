@@ -9,6 +9,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+
+/**
+ * This class provides a method to retrieve all methods (both directly and indirectly called)
+ * invoked by a specific method. It enables extraction of the complete set of methods in a call flow
+ */
 public class MethodInvocationAnalyzer {
 
     /**
