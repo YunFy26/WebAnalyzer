@@ -2,11 +2,11 @@ optionsFile: null
 printHelp: false
 # WebGoat libs
 classPath :
-#  - WebGoat/BOOT-INF/lib
-  - /Users/yuntsy/My/Projects/Java/SpringTest/build/libs/BOOT-INF/lib
+  - WebGoat/BOOT-INF/lib
+#  - /Users/yuntsy/My/Projects/Java/SpringTest/build/libs/BOOT-INF/lib
 # appClass
-#appClassPath: [WebGoat/BOOT-INF/classes]
-appClassPath: [/Users/yuntsy/My/Projects/Java/SpringTest/build/classes/java/main]
+appClassPath: [WebGoat/BOOT-INF/classes]
+#appClassPath: [/Users/yuntsy/My/Projects/Java/SpringTest/build/classes/java/main]
 mainClass:
 inputClasses: []
 javaVersion: 17
@@ -24,9 +24,8 @@ analyses:
   routerAnalysis: ""
   beanAnalysis: ""
   cg: ""
-#  cfg: ""
-#  icfg: ""
-#  splitIcfgFlows: ""
+  cfg: ""
+  icfg: ""
   pta: "plugins:[org.example.spring.DICGConstructorPlugin]"
 onlyGenPlan: false
 keepResult:
