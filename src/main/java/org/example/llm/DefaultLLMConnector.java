@@ -3,20 +3,16 @@ package org.example.llm;
 import com.knuddels.jtokkit.api.EncodingType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.printer.CallGraphPrinter;
-import org.example.rag.RepositoryBuilder;
 import org.example.rag.es.ElasticsearchUtils;
 import org.example.utils.DotProcessor;
 import org.example.utils.DotReader;
 import org.example.utils.MethodInvocationAnalyzer;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
-import pascal.taie.ir.IR;
 import pascal.taie.ir.stmt.Invoke;
 import pascal.taie.language.classes.JMethod;
 import pascal.taie.language.type.Type;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +40,9 @@ public class DefaultLLMConnector {
     // gpt3.5 / gpt-4 encodingType
     private static final EncodingType ENCODING_TYPE = EncodingType.CL100K_BASE;
 
-    private final int BACKGROUND_SYSTEM_PROMPT_TOKENS = Tokenizer.countTokens(Prompt.BACKGROUND_SYSTEM_PROMPT.getContent(), ENCODING_TYPE);
+    private final int BACKGROUND_SYSTEM_PROMPT_TOKENS = Tokenizer.countTokens(Prompts.BACKGROUND_SYSTEM_PROMPT.getContent(), ENCODING_TYPE);
 
-    private final int USER_PROMPT_TOKENS = Tokenizer.countTokens(Prompt.USER_PROMPT.getContent(), ENCODING_TYPE);
+    private final int USER_PROMPT_TOKENS = Tokenizer.countTokens(Prompts.USER_PROMPT.getContent(), ENCODING_TYPE);
 
     private final int MAX_DYNAMIC_TOKENS = MAX_SEND_TOKENS - BACKGROUND_SYSTEM_PROMPT_TOKENS - USER_PROMPT_TOKENS;
 
@@ -93,12 +89,12 @@ public class DefaultLLMConnector {
                 String methodSignature = callesList.get(i);
                 String methodBody = ElasticsearchUtils.fetchData(methodSignature);
                 logger.info(count++);
-//                String currentDescription = gptModel.sendRequest(Prompt.METHOD_DESCRIPTION_SYSTEM_PROMPT.getContent(), String.format(Prompt.METHOD_DESCRIPTION_USER_PROMPT.getContent(), methodSignature, methodBody));
+//                String currentDescription = gptModel.sendRequest(Prompts.METHOD_DESCRIPTION_SYSTEM_PROMPT.getContent(), String.format(Prompts.METHOD_DESCRIPTION_USER_PROMPT.getContent(), methodSignature, methodBody));
 //                methodDescription.append(currentDescription);
             }
 
-            String systemPrompt = Prompt.BACKGROUND_SYSTEM_PROMPT.getContent();
-            String userPrompt = String.format(Prompt.USER_PROMPT.getContent(), callFlow, methodDescription);
+            String systemPrompt = Prompts.BACKGROUND_SYSTEM_PROMPT.getContent();
+            String userPrompt = String.format(Prompts.USER_PROMPT.getContent(), callFlow, methodDescription);
             int inputTokens = Tokenizer.countTokens(systemPrompt + userPrompt, ENCODING_TYPE);
 //            slidingWindow(systemPrompt, methodDescription);
 //            if (inputTokens > MAX_SEND_TOKENS){
@@ -106,7 +102,7 @@ public class DefaultLLMConnector {
 //            }
             logger.info("-------------------------------------");
             logger.info(systemPrompt + userPrompt);
-//            result = gptModel.sendRequest(Prompt.BACKGROUND_SYSTEM_PROMPT.getContent(), String.format(Prompt.USER_PROMPT.getContent(), callFlow, methodDescription));
+//            result = gptModel.sendRequest(Prompts.BACKGROUND_SYSTEM_PROMPT.getContent(), String.format(Prompts.USER_PROMPT.getContent(), callFlow, methodDescription));
 //            logger.info(result);
             methodDescription.setLength(0);
         }
