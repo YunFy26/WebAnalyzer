@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
 
 public class DefaultLLMConnector {
 
-    private final String apiKey = "sk-s0cwmAJ7OmaW4c0qgxNcLFkmbKmbglfwnp8ghUXKZRjMakjH";
+//    private final String apiKey = "sk-s0cwmAJ7OmaW4c0qgxNcLFkmbKmbglfwnp8ghUXKZRjMakjH";
+    // wwh-api
+    private final String apiKey = "sk-guasPFsQLWXTZcrOun8arFupvN3NIwOl9Ryyrjhkq3WXQuSY";
 
     private final String apiUrl = "https://api.chatanywhere.tech/v1/chat/completions";
 
@@ -79,6 +81,7 @@ public class DefaultLLMConnector {
         List<File> dotFiles = dotReader.getDotFiles();
         StringBuilder methodDescription = new StringBuilder();
         String result = null;
+        int count = 0;
         for (File dotFile : dotFiles) {
             String callFlow = DotProcessor.processCallGraph(dotReader.readDotFile(dotFile));
             int callFlowTokens = Tokenizer.countTokens(callFlow, ENCODING_TYPE);
@@ -89,26 +92,27 @@ public class DefaultLLMConnector {
             for (int i = 0; i < size; i++) {
                 String methodSignature = callesList.get(i);
                 String methodBody = ElasticsearchUtils.fetchData(methodSignature);
-                methodDescription.append(gptModel.sendRequest(Prompt.METHOD_DESCRIPTION_SYSTEM_PROMPT.getContent(), String.format(Prompt.METHOD_DESCRIPTION_USER_PROMPT.getContent(), methodSignature, methodBody)));
-//                logger.info(methodSignature);
-                if (Tokenizer.countTokens(methodDescription.toString(), ENCODING_TYPE) > maxMethodDescriptionTokens){
-                    logger.info(Tokenizer.countTokens(methodDescription.toString(), ENCODING_TYPE));
-                    logger.info("MethodDescriptionTokens is too long: ");
-                }
+                logger.info(count++);
+//                String currentDescription = gptModel.sendRequest(Prompt.METHOD_DESCRIPTION_SYSTEM_PROMPT.getContent(), String.format(Prompt.METHOD_DESCRIPTION_USER_PROMPT.getContent(), methodSignature, methodBody));
+//                methodDescription.append(currentDescription);
             }
-//            logger.info(methodDescription);
+
             String systemPrompt = Prompt.BACKGROUND_SYSTEM_PROMPT.getContent();
             String userPrompt = String.format(Prompt.USER_PROMPT.getContent(), callFlow, methodDescription);
             int inputTokens = Tokenizer.countTokens(systemPrompt + userPrompt, ENCODING_TYPE);
-            if (inputTokens > MAX_SEND_TOKENS){
-
-            }
-            result = gptModel.sendRequest(Prompt.BACKGROUND_SYSTEM_PROMPT.getContent(), String.format(Prompt.USER_PROMPT.getContent(), callFlow, methodDescription));
-            logger.info(result);
+//            slidingWindow(systemPrompt, methodDescription);
+//            if (inputTokens > MAX_SEND_TOKENS){
+//
+//            }
+            logger.info("-------------------------------------");
+            logger.info(systemPrompt + userPrompt);
+//            result = gptModel.sendRequest(Prompt.BACKGROUND_SYSTEM_PROMPT.getContent(), String.format(Prompt.USER_PROMPT.getContent(), callFlow, methodDescription));
+//            logger.info(result);
+            methodDescription.setLength(0);
         }
     }
 
-    private void sendToLLM() throws Exception {
+    private void window() throws Exception {
 
     }
 
