@@ -47,6 +47,10 @@ dependencies {
     implementation("com.knuddels:jtokkit:1.1.0")
 
 
+    implementation("co.elastic.clients:elasticsearch-java:8.15.3")
+    implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:8.0.0-alpha2")
+
+
 
 
 
