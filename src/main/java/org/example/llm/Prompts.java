@@ -1,6 +1,6 @@
 package org.example.llm;
 
-public enum Prompt {
+public enum Prompts {
 
     BACKGROUND_SYSTEM_PROMPT("""
             You are the world's foremost expert in Java security analysis, renowned for uncovering novel and complex vulnerabilities in enterprise applications. Your task is to perform an exhaustive static code analysis, focusing on remotely exploitable vulnerabilities including but not limited to:
@@ -105,6 +105,7 @@ public enum Prompt {
             Return Format:
             Please provide your output in the following JSON format:
             {
+              "methodName": The name of method
               "inputParams": "The method receives 'request' as an HttpServletRequest, which may be a taint source due to user-controlled input.",
               "output": "The method returns a String, which is not user-controlled.",
               "methodDescription": "Handles an HTTP request and may execute a command based on the 'cmd' input parameter.",
@@ -115,8 +116,6 @@ public enum Prompt {
             The IR of method:%s is:%s
             """),
 
-
-
     USER_PROMPT("""
             Please determine whether this call flow may contain vulnerabilities based on the call flow and the description of each method. If vulnerabilities are present, please output the type of vulnerability and identify the specific call points within the flow where the vulnerability might be triggered.
             Note that the call flow may not contain any vulnerabilities.Please try your best to reduce false positives and false negatives. if vulnerabilities are not present, triggerPoints is none.
@@ -126,7 +125,7 @@ public enum Prompt {
               "hasVul": true/false,
               "vulType": "VulType",
               "triggerPoints": ["methodName:TriggerPoint"]
-              "confidence score": If the likelihood of a vulnerability is high, assign a higher score; if the likelihood is low, assign a lower score, rating from 0 to 10.
+              "confidenceScore": If the likelihood of a vulnerability is high, assign a higher score; if the likelihood is low, assign a lower score, rating from 0 to 10.
             }
             The call flow is:%s
             The method description is:%s
@@ -134,7 +133,7 @@ public enum Prompt {
 
     private final String content;
 
-    Prompt(String content) {
+    Prompts(String content) {
         this.content = content;
     }
 
