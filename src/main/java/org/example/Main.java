@@ -2,11 +2,18 @@ package org.example;
 
 
 import org.apache.commons.cli.*;
+import org.example.llm.DefaultLLMConnector;
 import org.example.printer.OutputPrinter;
+import org.example.rag.RepositoryBuilder;
+import pascal.taie.World;
+import pascal.taie.analysis.graph.callgraph.CallGraph;
+import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
+import pascal.taie.ir.stmt.Invoke;
+import pascal.taie.language.classes.JMethod;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         Options options = new Options();
 
@@ -52,6 +59,12 @@ public class Main {
 //            CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
 //            DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
 //        }
+        CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
+//        RepositoryBuilder repositoryBuilder = new RepositoryBuilder(callGraph);
+//        repositoryBuilder.build();
+        DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
+        llmConnector.analyze();
+
 
 
 
