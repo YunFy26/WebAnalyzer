@@ -41,14 +41,20 @@ dependencies {
     implementation("net.pascal-lab:tai-e:$taieVersion")
     implementation("org.apache.logging.log4j:log4j-api:2.23.0")
     implementation("org.apache.logging.log4j:log4j-core:2.23.0")
+    runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.0")
     implementation("commons-cli:commons-cli:1.4")
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
     implementation("com.knuddels:jtokkit:1.1.0")
+    implementation("org.apache.poi:poi:5.3.0")
+    implementation("org.apache.poi:poi-ooxml:5.3.0")
+
+
 
 
     implementation("co.elastic.clients:elasticsearch-java:8.15.3")
-    implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:8.0.0-alpha2")
+//    implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:8.0.0-alpha2")
+    implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.25")
 
 
 
