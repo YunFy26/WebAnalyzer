@@ -1,5 +1,4 @@
 # 项目介绍
-___
 基于Tai-e插件系统开发的Web应用分析程序，可以直接用来分析Web项目。目前只支持分析Spring项目。
 - URL映射：提取Spring Web应用中的路由信息，生成URL与其对应的入口方法映射关系
 - Bean提取：自动识别和提取Spring应用中的Bean
@@ -12,7 +11,6 @@ ___
 项目尚处于开发阶段，但针对web多入口生成独立调用图功能目前可用
 
 # 使用说明
-___
 1. ```options.yml```
 ```yml
 optionsFile: null
@@ -62,12 +60,10 @@ keepResult:
 关于```options.yml```中选项的详细信息请阅读：[Tai-e 配置](https://tai-e.pascal-lab.net/docs/current/reference/en/command-line-options.html)
 
 # 输出
-___
 - `output/urls.txt`: 路由映射关系
 - `outputs/callFlows/*.dot`: 不同入口的调用图，以入口方法命名
 
 # TODO
-___
 - [ ] 处理面向切面编程特性，完善调用图
 - [ ] 抽象出入口方法参数类型的对象，完善调用图
 - [ ] 优化路由信息提取流程，输出结果
