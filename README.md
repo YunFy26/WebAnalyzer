@@ -61,7 +61,7 @@ keepResult:
 
 # 输出
 - `output/urls.txt`: 路由映射关系
-- `outputs/callFlows/*.dot`: 不同入口的调用图，以入口方法命名
+- `output/callFlows/*.dot`: 不同入口的调用图，以入口方法命名
 
 # TODO
 - [ ] 处理面向切面编程特性，完善调用图
