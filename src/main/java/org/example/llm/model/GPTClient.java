@@ -1,4 +1,4 @@
-package org.example.llm;
+package org.example.llm.model;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +33,6 @@ public class GPTClient extends AbstractModelClient {
         );
     }
 
-
     @Override
     protected String buildRequestBody(String systemPrompt, String userPrompt) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
@@ -48,9 +47,14 @@ public class GPTClient extends AbstractModelClient {
         return objectMapper.writeValueAsString(requestBody);
     }
 
+    @Override
+    public String sendRequest(String systemPrompt, String userPrompt) throws Exception {
+        return super.sendRequest(systemPrompt, userPrompt);
+    }
+
 
     @Override
-    protected String handleResponse(String responseBody) throws Exception {
+    public String handleResponse(String responseBody) throws Exception {
         Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
         List<Map<String, Object>> choices = (List<Map<String, Object>>) responseMap.get("choices");
         Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
