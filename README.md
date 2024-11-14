@@ -6,9 +6,15 @@
   - 处理依赖注入的对象，能够正确处理依赖注入对象的方法调用
   - 尚未处理面向切面编程
 - 漏洞检测：基于已识别的调用流，检测潜在的漏洞点，识别漏洞类型
-  - 相关代码在`llm`分支，使用大模型进行检测，目前尚不完善，正在开发中...
+  - 相关代码在`llm`分支，在使用大模型进行检测前，请在`DefaultLLMConnector.java`中填写api key，目前仅实现了GPT与讯飞星火大模型客户端
+  - 使用前请加入运行参数：`-v`
+  - 这部分会消耗大量Token
+  - **效果待优化**...更好的处理方式正在开发中...
 
-项目尚处于开发阶段，但针对web多入口生成独立调用图功能目前可用
+> 项目尚处于开发阶段  
+针对web多入口生成独立调用图功能目前可用  
+漏洞检测需要填写自己的api key（GPT或讯飞星火大模型）
+或者根据`ModelClient.java`接口实现任意大模型客户端
 
 # 使用说明
 1. ```options.yml```
@@ -17,7 +23,7 @@ optionsFile: null
 printHelp: false
 # 第三方依赖路径，支持输入jar包
 classPath :
-  - WebGoat/BOOT-INF/lib
+    - WebGoat/BOOT-INF/lib
 # 应用程序类路径
 appClassPath: [WebGoat/BOOT-INF/classes]
 mainClass:
@@ -61,7 +67,7 @@ keepResult:
 
 # 输出
 - `output/urls.txt`: 路由映射关系
-- `outputs/callFlows/*.dot`: 不同入口的调用图，以入口方法命名
+- `output/callFlows/*.dot`: 不同入口的调用图，以入口方法命名
 
 # TODO
 - [ ] 处理面向切面编程特性，完善调用图
