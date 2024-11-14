@@ -1,4 +1,4 @@
-package org.example.llm;
+package org.example.llm.model;
 
 import java.net.URI;
 import java.net.http.HttpClient;
