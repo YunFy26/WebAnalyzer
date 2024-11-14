@@ -27,19 +27,19 @@ import java.util.stream.Collectors;
 public class DefaultLLMConnector {
 
     // yuntsy-apiKey
-//    private final String gptApiKey = "sk-s0cwmAJ7OmaW4c0qgxNcLFkmbKmbglfwnp8ghUXKZRjMakjH";
+//    private final String gptApiKey = "sk-...";
 
     // d3do-apiKey
-    private final String gptApiKey = "sk-guasPFsQLWXTZcrOun8arFupvN3NIwOl9Ryyrjhkq3WXQuSY";
+    private final String gptApiKey = "sk-...";
 
-    private final String gptApiUrl = "https://api.chatanywhere.tech/v1/chat/completions";
+    private final String gptApiUrl = "...";
 
     // gpt model
     private final GPTClient gptModel = new GPTClient(gptApiKey, gptApiUrl);
 
-    private final String sparkApiKey = "VltezWxlvUSTIVlOcatK:gyHhGDPCCucNfttXYBZs";
+    private final String sparkApiKey = "...";
 
-    private final String sparkApiUrl = "https://spark-api-open.xf-yun.com/v1/chat/completions";
+    private final String sparkApiUrl = "...";
 
     // spark model
     private final SparkClient sparkModel = new SparkClient(sparkApiKey, sparkApiUrl);
