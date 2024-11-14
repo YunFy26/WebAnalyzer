@@ -3,6 +3,9 @@ package org.example.llm;
 import com.knuddels.jtokkit.api.EncodingType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.llm.model.GPTClient;
+import org.example.llm.model.SparkClient;
+import org.example.printer.VulnsPrinter;
 import org.example.rag.es.ElasticsearchUtils;
 import org.example.utils.DotProcessor;
 import org.example.utils.DotReader;
@@ -19,15 +22,27 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+// TODO: 1. 知识库信息构建
 public class DefaultLLMConnector {
 
-//    private final String apiKey = "sk-s0cwmAJ7OmaW4c0qgxNcLFkmbKmbglfwnp8ghUXKZRjMakjH";
-    // wwh-api
-    private final String apiKey = "sk-guasPFsQLWXTZcrOun8arFupvN3NIwOl9Ryyrjhkq3WXQuSY";
+    // yuntsy-apiKey
+//    private final String gptApiKey = "sk-s0cwmAJ7OmaW4c0qgxNcLFkmbKmbglfwnp8ghUXKZRjMakjH";
 
-    private final String apiUrl = "https://api.chatanywhere.tech/v1/chat/completions";
+    // d3do-apiKey
+    private final String gptApiKey = "sk-guasPFsQLWXTZcrOun8arFupvN3NIwOl9Ryyrjhkq3WXQuSY";
 
-    private final GPTClient gptModel = new GPTClient(apiKey, apiUrl);
+    private final String gptApiUrl = "https://api.chatanywhere.tech/v1/chat/completions";
+
+    // gpt model
+    private final GPTClient gptModel = new GPTClient(gptApiKey, gptApiUrl);
+
+    private final String sparkApiKey = "VltezWxlvUSTIVlOcatK:gyHhGDPCCucNfttXYBZs";
+
+    private final String sparkApiUrl = "https://spark-api-open.xf-yun.com/v1/chat/completions";
+
+    // spark model
+    private final SparkClient sparkModel = new SparkClient(sparkApiKey, sparkApiUrl);
 
     private final CallGraph<Invoke, JMethod> callGraph;
 
@@ -35,17 +50,22 @@ public class DefaultLLMConnector {
 
     private final Logger logger = LogManager.getLogger(DefaultLLMConnector.class);
 
-    private final int MAX_SEND_TOKENS = 3900;
+    // determine the max tokens of input
+    private final int MAX_SEND_TOKENS = 8000;
 
     // gpt3.5 / gpt-4 encodingType
     private static final EncodingType ENCODING_TYPE = EncodingType.CL100K_BASE;
 
+    // tokens of BACKGROUND_SYSTEM_PROMPT
     private final int BACKGROUND_SYSTEM_PROMPT_TOKENS = Tokenizer.countTokens(Prompts.BACKGROUND_SYSTEM_PROMPT.getContent(), ENCODING_TYPE);
 
+    // tokens of USER_PROMPT
     private final int USER_PROMPT_TOKENS = Tokenizer.countTokens(Prompts.USER_PROMPT.getContent(), ENCODING_TYPE);
 
+    // max tokens of DYNAMIC_PROMPT (DYNAMIC_PROMPT within USER_PROMPT)
     private final int MAX_DYNAMIC_TOKENS = MAX_SEND_TOKENS - BACKGROUND_SYSTEM_PROMPT_TOKENS - USER_PROMPT_TOKENS;
 
+    // Map<entryMethod, List<direct and indirect calls>>
     private final HashMap<String, List<String>> invocationMap = new HashMap<>();
 
 
@@ -54,7 +74,10 @@ public class DefaultLLMConnector {
         this.dotReader = new DotReader("output/callFlows");
     }
 
-    public void setInvocationMap(){
+    /**
+     * For each call flow, get the direct and indirect calls of the entry method.
+     */
+    private void setInvocationMap(){
         callGraph.entryMethods().forEach(jMethod -> {
             String key = String.valueOf(jMethod.getDeclaringClass()) + '.' +
                     jMethod.getName() + '(' +
@@ -72,12 +95,16 @@ public class DefaultLLMConnector {
         });
     }
 
+    /**
+     * For each call flow, get the description of each method in the call flow.
+     * Then send the request to llm, the response contains whether the call flow include vulnerability.
+     */
     public void analyze() throws Exception {
         setInvocationMap();
         List<File> dotFiles = dotReader.getDotFiles();
         StringBuilder methodDescription = new StringBuilder();
         String result = null;
-        int count = 0;
+//        int count = 0;
         for (File dotFile : dotFiles) {
             String callFlow = DotProcessor.processCallGraph(dotReader.readDotFile(dotFile));
             int callFlowTokens = Tokenizer.countTokens(callFlow, ENCODING_TYPE);
@@ -85,10 +112,11 @@ public class DefaultLLMConnector {
 //            logger.info(dotFile.getName());
             List<String> callesList = invocationMap.get(dotFile.getName().replace(".dot", ""));
             int size = callesList.size();
+            // get the description of every method in the call flow
             for (int i = 0; i < size; i++) {
                 String methodSignature = callesList.get(i);
-                String methodBody = ElasticsearchUtils.fetchData(methodSignature);
-                logger.info(count++);
+                String methodBody = ElasticsearchUtils.fetchMethodData(methodSignature);
+//                logger.info(count++);
 //                String currentDescription = gptModel.sendRequest(Prompts.METHOD_DESCRIPTION_SYSTEM_PROMPT.getContent(), String.format(Prompts.METHOD_DESCRIPTION_USER_PROMPT.getContent(), methodSignature, methodBody));
 //                methodDescription.append(currentDescription);
             }
@@ -108,8 +136,31 @@ public class DefaultLLMConnector {
         }
     }
 
-    private void window() throws Exception {
+    public void analyzeVuln() throws Exception {
+        List<File> dotFiles = dotReader.getDotFiles();
+        int count = 0;
+        for (File dotFile : dotFiles) {
+            String callFlow = dotReader.readDotFile(dotFile);
+//            String callFlow = DotProcessor.processCallGraph(dotReader.readDotFile(dotFile));
+            int callFlowTokens = Tokenizer.countTokens(callFlow, ENCODING_TYPE);
+            String systemPrompt = Prompts.BACKGROUND_SYSTEM_PROMPT.getContent();
+            String entryMethodName = dotFile.getName().replace(".dot", "");
+            if (callFlowTokens <= MAX_DYNAMIC_TOKENS){
+                String userPrompt = String.format(Prompts.USER_PROMPT.getContent(), callFlow);
+                logger.info("Start analyzing the {} call flow, the entry point is: {}" , ++count, entryMethodName);
+                String response = sparkModel.sendRequest(systemPrompt, userPrompt);
+                response = response.replaceAll("^```json\\s*", "").replaceAll("\\s*```$", "");
+                logger.info("Write the analysis results of the call flow into: output/vulns.xlsx");
+                try{
+                    VulnsPrinter.generateExcel(response);
+                }catch (Exception e){
+                    logger.warn("Failed to process response for entry point {}: {}", entryMethodName, e.getMessage());
+                }
+//                logger.info(systemPrompt + userPrompt);
+            }else {
 
+            }
+        }
     }
 
 }

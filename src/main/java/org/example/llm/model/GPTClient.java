@@ -17,6 +17,7 @@ public class GPTClient extends AbstractModelClient {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+
     public GPTClient(String apiKey, String apiUrl) {
         super(apiKey, apiUrl);
         this.modelName = "gpt-3.5-turbo";
