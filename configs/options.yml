@@ -24,8 +24,8 @@ analyses:
   routerAnalysis: ""
   beanAnalysis: ""
   cg: ""
-  cfg: ""
-  icfg: ""
+#  cfg: ""
+#  icfg: ""
   pta: "plugins:[org.example.spring.DICGConstructorPlugin]"
 onlyGenPlan: false
 keepResult:
