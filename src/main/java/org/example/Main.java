@@ -4,12 +4,12 @@ package org.example;
 import org.apache.commons.cli.*;
 import org.example.llm.DefaultLLMConnector;
 import org.example.printer.OutputPrinter;
-import org.example.rag.RepositoryBuilder;
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
 import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;
 import pascal.taie.ir.stmt.Invoke;
 import pascal.taie.language.classes.JMethod;
+
 
 public class Main {
 
@@ -21,28 +21,27 @@ public class Main {
         optionFile.setRequired(true);
         options.addOption(optionFile);
 
-        Option enableLLMOption = new Option("e", "enable-llm", false, "启用 LLM 进行漏洞检测");
-        enableLLMOption.setRequired(false);
-        options.addOption(enableLLMOption);
+        Option enableVulnAnalyze = new Option("v", "vulns-analyze", false, "启用 LLM 进行漏洞检测");
+        enableVulnAnalyze.setRequired(false);
+        options.addOption(enableVulnAnalyze);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
 
         String optionsFilePath;
-        boolean enableLLM = false;
+        boolean enableVulnAnalysis = false;
 
         try {
             cmd = parser.parse(options, args);
             optionsFilePath = cmd.getOptionValue("options-file");
-            if (cmd.hasOption("enable-llm") || cmd.hasOption("e")) {
-                String enableLLMValue = cmd.getOptionValue("enable-llm");
-                enableLLM = Boolean.parseBoolean(enableLLMValue);
-            }
+
+            // 如果存在 "vulns-analyze" 选项，则启用漏洞分析
+            enableVulnAnalysis = cmd.hasOption("vulns-analyze");
 
         } catch (org.apache.commons.cli.ParseException e) {
             System.out.println("Error: " + e.getMessage());
-            formatter.printHelp("--options-file=<path>", options);
+            formatter.printHelp("java -jar <YourProgram>.jar --options-file=<path> [-v]", options);
             System.exit(1);
             return;
         }
@@ -54,21 +53,12 @@ public class Main {
         // Output
         OutputPrinter.outputUrls();
         OutputPrinter.outputCallFlows();
-        OutputPrinter.outputIcfg();
-//        if (enableLLM){
-//            CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
-//            DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
-//        }
-        CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
-//        RepositoryBuilder repositoryBuilder = new RepositoryBuilder(callGraph);
-//        repositoryBuilder.build();
-        DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
-        llmConnector.analyze();
-
-
-
-
-
+//        OutputPrinter.outputIcfg();
+        if (enableVulnAnalysis){
+            CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
+            DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
+            llmConnector.analyzeVuln();
+        }
     }
 
 
