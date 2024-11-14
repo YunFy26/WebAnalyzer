@@ -1,25 +1,23 @@
 # 项目介绍
-___
-基于Tai-e插件系统开发的Web应用分析程序，可以直接用来分析Web项目。目前只支持分析Spring项目。
+基于Tai-e插件系统开发的Web应用分析程序，可以直接用来分析Web项目。目前只对Spring项目的动态特性做了处理。
 - URL映射：提取Spring Web应用中的路由信息，生成URL与其对应的入口方法映射关系
 - Bean提取：自动识别和提取Spring应用中的Bean
 - 调用图构造：为每个入口方法生成独立的调用图
-   - 处理依赖注入的对象，能够正确处理依赖注入对象的方法调用
-   - 尚未处理面向切面编程
+  - 处理依赖注入的对象，能够正确处理依赖注入对象的方法调用
+  - 尚未处理面向切面编程
 - 漏洞检测：基于已识别的调用流，检测潜在的漏洞点，识别漏洞类型
-  - 相关代码在`llm`分支，使用大模型进行检测，目前尚不完善，正在开发中... 
-  
+  - 相关代码在`llm`分支，使用大模型进行检测，目前尚不完善，正在开发中...
+
 项目尚处于开发阶段，但针对web多入口生成独立调用图功能目前可用
 
 # 使用说明
-___
 1. ```options.yml```
 ```yml
 optionsFile: null
 printHelp: false
 # 第三方依赖路径，支持输入jar包
 classPath :
-    - WebGoat/BOOT-INF/lib
+  - WebGoat/BOOT-INF/lib
 # 应用程序类路径
 appClassPath: [WebGoat/BOOT-INF/classes]
 mainClass:
@@ -62,12 +60,10 @@ keepResult:
 关于```options.yml```中选项的详细信息请阅读：[Tai-e 配置](https://tai-e.pascal-lab.net/docs/current/reference/en/command-line-options.html)
 
 # 输出
-___
 - `output/urls.txt`: 路由映射关系
 - `outputs/callFlows/*.dot`: 不同入口的调用图，以入口方法命名
 
 # TODO
-___
 - [ ] 处理面向切面编程特性，完善调用图
 - [ ] 抽象出入口方法参数类型的对象，完善调用图
 - [ ] 优化路由信息提取流程，输出结果
