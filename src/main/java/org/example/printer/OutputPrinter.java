@@ -2,8 +2,8 @@ package org.example.printer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.spring.ControllerClass;
-import org.example.spring.RouterAnalysis;
+import org.example.spring.router.ControllerClass;
+import org.example.spring.analysis.RouterAnalysis;
 import pascal.taie.World;
 import pascal.taie.analysis.graph.callgraph.CallGraph;
 import pascal.taie.analysis.graph.callgraph.CallGraphBuilder;

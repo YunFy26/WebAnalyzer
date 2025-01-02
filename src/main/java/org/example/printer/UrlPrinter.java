@@ -2,8 +2,8 @@ package org.example.printer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.spring.ControllerClass;
-import org.example.spring.RouterMethod;
+import org.example.spring.router.ControllerClass;
+import org.example.spring.router.RouterMethod;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
