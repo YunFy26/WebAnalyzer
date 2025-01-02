@@ -1,4 +1,4 @@
-package org.example.spring.bean;
+package org.example.spring.di.bean;
 
 public enum BeanAnnotationRules {
 
