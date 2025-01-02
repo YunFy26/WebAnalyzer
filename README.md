@@ -16,6 +16,8 @@
 漏洞检测需要填写自己的api key（GPT或讯飞星火大模型）
 或者根据`ModelClient.java`接口实现任意大模型客户端
 
+😀后续会更新文档，解释处理流程<br>
+😀前端界面正在实现...
 # 使用说明
 1. ```options.yml```
 ```yml
@@ -40,15 +42,14 @@ scope: APP
 nativeModel: true
 planFile: null
 analyses:
-  ir-dumper: ;
-  # 分析路由
+#  ir-dumper: ;
   routerAnalysis: ""
-  # 提取Bean
   beanAnalysis: ""
+  injectPointsAnalysis: ""
   cg: ""
   #  cfg: ""
   #  icfg: ""
-  pta: "plugins:[org.example.spring.DICGConstructorPlugin]"
+  pta: "plugins:[org.example.spring.plugin.ProcessDIPlugin]"
 onlyGenPlan: false
 keepResult:
   - $KEEP-ALL
