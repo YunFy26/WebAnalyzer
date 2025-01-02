@@ -1,6 +1,7 @@
-package org.example.spring.bean;
+package org.example.spring.analysis;
 
-import org.example.spring.BeanAnnotationRules;
+import org.example.spring.di.bean.BeanAnnotationRules;
+import org.example.spring.di.bean.BeanInfo;
 import org.example.utils.SpringUtils;
 import pascal.taie.World;
 import pascal.taie.analysis.ProgramAnalysis;
