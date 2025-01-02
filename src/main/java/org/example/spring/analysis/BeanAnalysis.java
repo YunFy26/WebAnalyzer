@@ -1,5 +1,6 @@
-package org.example.spring;
+package org.example.spring.bean;
 
+import org.example.spring.BeanAnnotationRules;
 import org.example.utils.SpringUtils;
 import pascal.taie.World;
 import pascal.taie.analysis.ProgramAnalysis;
@@ -33,7 +34,7 @@ public class BeanAnalysis extends ProgramAnalysis {
 
     private void extractBeans() {
         World world = World.get();
-        Stream<JClass> jClassStream = world.getClassHierarchy().applicationClasses();
+        Stream<JClass> jClassStream = world.getClassHierarchy().allClasses();
 
         for (JClass jClass : jClassStream.toList()) {
             // 查找带有 @Component、@Service、@Controller、@Repository 注解的类

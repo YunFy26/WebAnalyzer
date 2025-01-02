@@ -1,4 +1,4 @@
-package org.example.spring;
+package org.example.spring.bean;
 
 import pascal.taie.language.classes.JClass;
 

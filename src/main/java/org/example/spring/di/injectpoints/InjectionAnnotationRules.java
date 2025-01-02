@@ -1,4 +1,4 @@
-package org.example.spring;
+package org.example.spring.injectpoints;
 
 public enum InjectionAnnotationRules {
     // 根据类型注入

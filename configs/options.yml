@@ -23,11 +23,12 @@ analyses:
   ir-dumper: ;
   routerAnalysis: ""
   beanAnalysis: ""
+  injectPointsAnalysis: ""
   cg: ""
 #  cfg: ""
 #  icfg: ""
 #  splitIcfgFlows: ""
-  pta: "plugins:[org.example.spring.DICGConstructorPlugin]"
+  pta: "plugins:[org.example.spring.plugin.ProcessDIPlugin]"
 onlyGenPlan: false
 keepResult:
   - $KEEP-ALL
