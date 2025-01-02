@@ -1,19 +1,14 @@
 package org.example.utils;
 
-import org.example.spring.BeanAnnotationRules;
-import org.example.spring.BeanInfo;
-import org.example.spring.InjectionAnnotationRules;
-import org.example.spring.InjectionPoint;
-import pascal.taie.ir.stmt.LoadField;
+import org.example.spring.di.bean.BeanAnnotationRules;
+import org.example.spring.di.bean.BeanInfo;
+import org.example.spring.di.injectpoints.InjectionAnnotationRules;
 import pascal.taie.language.annotation.Annotation;
 import pascal.taie.language.classes.ClassHierarchy;
 import pascal.taie.language.classes.JClass;
 import pascal.taie.language.classes.JField;
-import pascal.taie.language.classes.JMethod;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class SpringUtils {
@@ -37,7 +32,8 @@ public class SpringUtils {
             String annotationType = annotation.getType();
             if (annotationType.equals(InjectionAnnotationRules.Autowired.getType()) ||
                     annotationType.equals(InjectionAnnotationRules.Inject.getType()) ||
-                    annotationType.equals(InjectionAnnotationRules.Resource.getType())) {
+                    annotationType.equals(InjectionAnnotationRules.Resource.getType())||
+                    annotationType.equals(InjectionAnnotationRules.Qualifier.getType())) {
                 return true;
             }
         }
@@ -59,7 +55,8 @@ public class SpringUtils {
         return jClass.hasAnnotation(BeanAnnotationRules.Component.getType()) ||
                 jClass.hasAnnotation(BeanAnnotationRules.Service.getType()) ||
                 jClass.hasAnnotation(BeanAnnotationRules.Repository.getType()) ||
-                jClass.hasAnnotation(BeanAnnotationRules.Controller.getType());
+                jClass.hasAnnotation(BeanAnnotationRules.Controller.getType()) ||
+                jClass.hasAnnotation(BeanAnnotationRules.RestController.getType());
     }
 
 }
