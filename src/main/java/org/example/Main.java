@@ -47,7 +47,7 @@ public class Main {
         // Output
         OutputPrinter.outputUrls();
         OutputPrinter.outputCallFlows();
-        OutputPrinter.outputIcfg();
+//        OutputPrinter.outputIcfg();
 //        if (enableLLM){
 //            CallGraph<Invoke, JMethod> callGraph = World.get().getResult(CallGraphBuilder.ID);
 //            DefaultLLMConnector llmConnector = new DefaultLLMConnector(callGraph);
