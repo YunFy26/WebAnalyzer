@@ -14,7 +14,7 @@
     merge-string-objects: true
     merge-string-builders: true
     merge-exception-objects: true
-    handle-invokedynamic: false
+    handle-invokedynamic: true
     propagate-types: [ reference ] # ,null,int,long,...(other primitive types)
     advanced: null # specify advanced analysis:
     # zipper | zipper-e | zipper-e=PV
@@ -166,14 +166,19 @@
 
 
 - description: router analysis
-  analysisClass: org.example.spring.RouterAnalysis
+  analysisClass: org.example.spring.analysis.RouterAnalysis
   id: routerAnalysis
   requires: []
 
 - description: bean analysis
-  analysisClass: org.example.spring.BeanAnalysis
+  analysisClass: org.example.spring.analysis.BeanAnalysis
   id: beanAnalysis
   requires: []
+
+- description: extract inject points
+  analysisClass: org.example.spring.analysis.InjectPointsAnalysis
+  id: injectPointsAnalysis
+  requires: [ routerAnalysis, beanAnalysis]
 
 #- description: extract call flows (including control flows) from every entry points
 #  analysisClass: org.example.spring.SplitIcfgFlows
