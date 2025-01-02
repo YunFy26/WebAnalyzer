@@ -27,7 +27,6 @@ analyses:
   cg: ""
 #  cfg: ""
 #  icfg: ""
-#  splitIcfgFlows: ""
   pta: "plugins:[org.example.spring.plugin.ProcessDIPlugin]"
 onlyGenPlan: false
 keepResult:
