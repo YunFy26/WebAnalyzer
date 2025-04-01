@@ -295,6 +295,8 @@ public class InjectPointsAnalysis extends ProgramAnalysis {
         logger.info("--------------------------------------------------------------------------------\n");
     }
 
+
+
     private String getSpecifyName(Collection<Annotation> methodAnnotations, Collection<Annotation> paramAnnotations) {
         String specifyName = getSpecifyName(methodAnnotations);
         if (specifyName.isEmpty()) {
@@ -348,7 +350,6 @@ public class InjectPointsAnalysis extends ProgramAnalysis {
         }
         return null;
     }
-
 
     private HashSet<String> findByType(String typeName) {
         JClass aClass = World.get().getClassHierarchy().getClass(typeName);
