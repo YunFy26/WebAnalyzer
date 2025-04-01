@@ -26,7 +26,8 @@
     expected-file: null # path of expected file for comparing results
     reflection-inference: string-constant # | solar | null
     reflection-log: null # path to reflection log, required when reflection option is log
-    taint-config: null # path (of dir/file) to config file of taint analysis,
+    taint-config: /Users/yuntsy/My/Projects/Java/WebAnalyzer/configs/taint-config.yml # path (of dir/file) to config file of taint analysis,
+#    taint-config: null # path (of dir/file) to config file of taint analysis,
     taint-config-providers: [ ] # class names of taint config provider classes
     # when this file is given, taint analysis will be enabled
     taint-interactive-mode: false # whether enable interactive mode for taint analysis
