@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("com.github.johnrengelman.shadow") version "8.1.0"  // 版本根据需要调整
+    id("com.github.johnrengelman.shadow") version "8.1.0"
 }
 
 repositories {
@@ -25,7 +25,7 @@ application {
     mainClass.set("org.example.Main")
 }
 
-val taieVersion = "0.5.1-SNAPSHOT" // or the latest version "0.5.1-SNAPSHOT"
+val taieVersion = "0.5.2-SNAPSHOT" // or the latest version "0.5.2-SNAPSHOT"
 
 tasks {
     jar {
